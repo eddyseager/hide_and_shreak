@@ -3,15 +3,6 @@ revision = 3
 requires-python = ">=3.11"
 
 [[package]]
-name = "attrs"
-version = "25.4.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/6b/5c/685e6633917e101e5dcb62b9dd76946cbb57c26e133bae9e0cd36033c0a9/attrs-25.4.0.tar.gz", hash = "sha256:16d5969b87f0859ef33a48b35d55ac1be6e42ae49d5e853b597db70c35c57e11", size = 934251, upload-time = "2025-10-06T13:54:44.725Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/3a/2a/7cc015f5b9f5db42b7d48157e23356022889fc354a2813c15934b7cb5c0e/attrs-25.4.0-py3-none-any.whl", hash = "sha256:adcf7e2a1fb3b36ac48d97835bb6d8ade15b8dcce26aba8bf1d14847b57a3373", size = 67615, upload-time = "2025-10-06T13:54:43.17Z" },
-]
-
-[[package]]
 name = "cffi"
 version = "2.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -79,6 +70,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/a0/1d/ec1a60bd1a10daa292d3cd6bb0b359a81607154fb8165f3ec95fe003b85c/cffi-2.0.0-cp314-cp314t-win32.whl", hash = "sha256:1fc9ea04857caf665289b7a75923f2c6ed559b8298a1b8c49e59f7dd95c8481e", size = 180487, upload-time = "2025-09-08T23:23:40.423Z" },
     { url = "https://files.pythonhosted.org/packages/bf/41/4c1168c74fac325c0c8156f04b6749c8b6a8f405bbf91413ba088359f60d/cffi-2.0.0-cp314-cp314t-win_amd64.whl", hash = "sha256:d68b6cef7827e8641e8ef16f4494edda8b36104d79773a334beaa1e3521430f6", size = 191726, upload-time = "2025-09-08T23:23:41.742Z" },
     { url = "https://files.pythonhosted.org/packages/ae/3a/dbeec9d1ee0844c679f6bb5d6ad4e9f198b1224f4e7a32825f47f6192b0c/cffi-2.0.0-cp314-cp314t-win_arm64.whl", hash = "sha256:0a1527a803f0a659de1af2e1fd700213caba79377e27e4693648c2923da066f9", size = 184195, upload-time = "2025-09-08T23:23:43.004Z" },
+]
+
+[[package]]
+name = "esper"
+version = "3.4"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/b6/3f/de53150c9ef43d1211ac40184a0908186df7b5b3c77237fe696175761638/esper-3.4.tar.gz", hash = "sha256:56ac0f4886c2c07f3ac093922d1424405614ad30afd2847fe6fa85a3a0ec5b81", size = 33513, upload-time = "2025-04-04T06:39:30.677Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/83/0b/e195fedd8f085026b20c568d210585150368986a03bd3422a31ceeb3b9ac/esper-3.4-py3-none-any.whl", hash = "sha256:5e4e41fdde1ff104eacf6cb9638272399b2ca5b7d1c3845cf9047d214c5cbfa3", size = 13503, upload-time = "2025-04-04T06:39:28.708Z" },
 ]
 
 [[package]]
@@ -176,13 +176,13 @@ name = "rogue-engine"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
-    { name = "attrs" },
+    { name = "esper" },
     { name = "tcod" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "attrs", specifier = ">=25.4.0" },
+    { name = "esper", specifier = ">=3.4" },
     { name = "tcod", specifier = ">=19.6.0" },
 ]
 
