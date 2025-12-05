@@ -6,6 +6,14 @@ import tcod.event
 import tcod.tileset
 from dataclasses import dataclass as component
 import esper
+from random import Random
+
+
+class Player:
+    pass
+
+class Gold:
+    pass
 
 @component
 class Position:
@@ -48,7 +56,7 @@ def on_event(event: tcod.event.Event) -> None:
             move_map(0, 1)
 
 def move_map(dx: int, dy: int) -> None:
-    _, pos = esper.get_component(Position)[0]
+    _, (_, pos) = esper.get_components(Player, Position)[0]
     _, dim = esper.get_component(MapDimension)[0]
     x = pos.x + dx
     y = pos.y + dy
@@ -68,7 +76,12 @@ def main() -> None:
     console = tcod.console.Console(map_width, map_height, order="F")
     esper.create_entity(MapDimension(map_height, map_width))
     esper.create_entity(console)
-    player = esper.create_entity(Position(console.width // 2, console.height // 2), Graphic("@", (255, 0, 0)))
+    player = esper.create_entity(Player(), Position(console.width // 2, console.height // 2), Graphic("@", (255, 255, 255)))
+
+    #make some gold
+    rng = Random()
+    for _ in range(10):
+        esper.create_entity(Gold(), Position(rng.randint(0, map_width), rng.randint(0, map_height)), Graphic("$", (255, 255, 0)))
     esper.add_processor(Draw())
     esper.set_handler('tcod_event', on_event)
 
