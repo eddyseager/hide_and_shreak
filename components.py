@@ -9,6 +9,9 @@ class Player:
 class Gold:
     pass
 
+class Wall:
+    pass
+
 @component
 class Position:
     x: int
