@@ -9,7 +9,7 @@ from random import Random
 from components import *
 from events import on_event
 from processors import *
-from entities import create_entities
+from entities import create_entities, load_level, create_map_dimension
 
 def main() -> None:
 
@@ -19,7 +19,9 @@ def main() -> None:
     tcod.tileset.procedural_block_elements(tileset=tileset)
     console = tcod.console.Console(MAP_WIDTH, MAP_HEIGHT, order="F")
     esper.create_entity(console)
-    create_entities()    
+    #create_entities()
+    create_map_dimension()
+    load_level("levels/0.level")
     esper.add_processor(Draw())
     esper.set_handler('tcod_event', on_event)
 
