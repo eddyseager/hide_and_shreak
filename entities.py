@@ -1,6 +1,7 @@
 import esper
 from components import *
 from random import Random
+import os
 
 #Some example entities
 def create_entities():
@@ -15,25 +16,42 @@ def create_entities():
     for _ in range(10):
         esper.create_entity(Gold(), Position(rng.randint(0, MAP_WIDTH), rng.randint(0, MAP_HEIGHT)), Graphic("$", (255, 255, 0)))
 
-def load_level(level: str) -> None:
-    with open(level) as file:
+def load_level() -> None:
+    _, level = esper.get_component(Level)[0]
+    with open(f'levels{os.sep}{level.val}.level') as file:
         x = 0
         y = 0
         for line in file:
             x =0
             for c in line:
-                if c == '@':
-                    create_player(x, y)
+                if c == '<':
+                    create_stairs_up(x, y)
+                elif c == '>':
+                    create_stairs_down(x, y)
                 elif ord(c) >= 0x2500 and ord(c) < 0x2600:
                     create_wall(x, y, c)
                 x += 1
             y += 1
 
+def remove_level() -> None:
+    #Deletes all entities with a position component - may want to fix later for the player
+    for e, _ in esper.get_component(Position):
+        esper.delete_entity(e, True)
+
 def create_player(x: int, y: int) -> None:
-    player = esper.create_entity(Player(), Position(x, y), Graphic("@", (255, 255, 255)))
+    esper.create_entity(Player(), Position(x, y), Graphic("@", (255, 255, 255)))
+
+def create_stairs_down(x: int, y: int) -> None:
+    esper.create_entity(StairsDown(), Position(x, y), Graphic(">", (255, 255, 255)))
+
+def create_stairs_up(x: int, y: int) -> None:
+    esper.create_entity(StairsUp(), Position(x, y), Graphic("<", (255, 255, 255)))
 
 def create_wall(x: int, y: int, g: str) -> None:
-    player = esper.create_entity(Wall(), Position(x, y), Graphic(g, (255, 255, 255)))
+    esper.create_entity(Wall(), Position(x, y), Graphic(g, (255, 255, 255)))
 
 def create_map_dimension() -> None:
     esper.create_entity(MapDimension(MAP_HEIGHT, MAP_WIDTH))
+
+def create_level() -> None:
+    esper.create_entity(Level(0))

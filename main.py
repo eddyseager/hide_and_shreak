@@ -9,7 +9,7 @@ from random import Random
 from components import *
 from events import on_event
 from processors import *
-from entities import create_entities, load_level, create_map_dimension
+from entities import create_entities, load_level, create_map_dimension, create_level, create_player
 
 def main() -> None:
 
@@ -21,7 +21,10 @@ def main() -> None:
     esper.create_entity(console)
     #create_entities()
     create_map_dimension()
-    load_level("levels/0.level")
+    create_level()
+    load_level()
+    _, (_, stair_up) = esper.get_components(StairsUp, Position)[0]
+    create_player(stair_up.x, stair_up.y)
     esper.add_processor(Draw())
     esper.set_handler('tcod_event', on_event)
 

@@ -12,6 +12,16 @@ class Gold:
 class Wall:
     pass
 
+class StairsDown:
+    pass
+
+class StairsUp:
+    pass
+
+@component
+class Level:
+    val: int
+
 @component
 class Position:
     x: int
