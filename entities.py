@@ -28,7 +28,7 @@ def load_level() -> None:
                     create_stairs_up(x, y)
                 elif c == '>':
                     create_stairs_down(x, y)
-                elif ord(c) >= 0x2500 and ord(c) < 0x2600:
+                elif ord(c) & 0xFF00 == 0x2500:
                     create_wall(x, y, c)
                 x += 1
             y += 1
