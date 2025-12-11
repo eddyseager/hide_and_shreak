@@ -177,12 +177,14 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "esper" },
+    { name = "numpy" },
     { name = "tcod" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "esper", specifier = ">=3.4" },
+    { name = "numpy", specifier = ">=2.3.5" },
     { name = "tcod", specifier = ">=19.6.0" },
 ]
 

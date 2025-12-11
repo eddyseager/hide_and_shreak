@@ -1,4 +1,5 @@
 from dataclasses import dataclass as component
+import numpy as np
 
 MAP_WIDTH = 60
 MAP_HEIGHT = 24
@@ -39,3 +40,8 @@ class MapDimension:
 
     def in_bounds(self, x: int, y: int) -> bool:
         return x >= 0 and x < self.width and y >= 0 and y < self.height
+
+@component
+class FOV:
+    transparent: np.ndarray
+    explored: np.ndarray
