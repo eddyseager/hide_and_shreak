@@ -19,13 +19,15 @@ def main() -> None:
     tcod.tileset.procedural_block_elements(tileset=tileset)
     console = tcod.console.Console(MAP_WIDTH, MAP_HEIGHT, order="F")
     esper.create_entity(console)
+
     #create_entities()
+    level = 0
     create_map_dimension()
-    create_level()
-    create_fov()
-    load_level()
+    create_level(level)
+    create_fov(level)
+    load_level(level)
     _, (_, stair_up) = esper.get_components(StairsUp, Position)[0]
-    create_player(stair_up.x, stair_up.y)
+    create_player(stair_up.x, stair_up.y, level)
     esper.add_processor(Draw())
     esper.set_handler('tcod_event', on_event)
 
