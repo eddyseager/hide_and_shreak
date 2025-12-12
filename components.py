@@ -13,6 +13,9 @@ class Gold:
 class Wall:
     pass
 
+class Floor:
+    pass
+
 class StairsDown:
     pass
 

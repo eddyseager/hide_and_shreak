@@ -13,6 +13,7 @@ class Draw(esper.Processor):
         visible = compute_fov(fov.transparent, (player_pos.x, player_pos.y), radius= 10)
         fov.explored |= visible
 
+        #Draw entities
         _, console = esper.get_component(tcod.console.Console)[0]
         for e, (pos, graphic) in esper.get_components(Position, Graphic):
             if fov.explored[pos.x, pos.y]:
