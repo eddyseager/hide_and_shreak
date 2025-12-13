@@ -20,7 +20,6 @@ def main() -> None:
     console = tcod.console.Console(MAP_WIDTH, MAP_HEIGHT, order="F")
     esper.create_entity(console)
 
-    #create_entities()
     level = 0
     create_map_dimension()
     create_level(level)
