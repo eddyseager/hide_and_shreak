@@ -22,19 +22,7 @@ def load_level(level: int) -> None:
                 x += 1
             y += 1
 
-def create_fov(level: int) -> None:
-    for e, l in esper.get_component(Level):
-        if l.val == level:
-            #Create the FOV if this level hasn't been visited before.
-            if not esper.has_component(e, FOV):
-                print(f"create fov level {l}")
-                #Create numpy array of walls to track transparency
-                trans = np.ones((MAP_WIDTH, MAP_HEIGHT), dtype=bool, order="F")
-                exp = np.zeros((MAP_WIDTH, MAP_HEIGHT), dtype=bool, order="F")
-                esper.add_component(e, FOV(explored=exp, transparent=trans))
-
 def remove_level() -> None:
-    #Deletes all entities with a position component - may want to fix later for the player
     for e, _ in esper.get_component(Position):
         esper.delete_entity(e, True)
 
@@ -62,4 +50,18 @@ def create_map_dimension() -> None:
     esper.create_entity(MapDimension(MAP_HEIGHT, MAP_WIDTH))
 
 def create_level(level: int) -> None:
-    esper.create_entity(Level(level))
+
+    #Check whether entity for this level already exists
+    create_level = True
+    for e, (l, f) in esper.get_components(Level, FOV):
+        if l.val == level:
+            create_level = False
+
+    if create_level:
+        #Create numpy array of walls to track transparency and explored tiles
+        trans = np.ones((MAP_WIDTH, MAP_HEIGHT), dtype=bool, order="F")
+        exp = np.zeros((MAP_WIDTH, MAP_HEIGHT), dtype=bool, order="F")
+        visible = np.zeros((MAP_WIDTH, MAP_HEIGHT), dtype=bool, order="F")
+        esper.create_entity(Level(level), FOV(explored=exp, transparent=trans, visible=visible))
+
+    load_level(level) #TODO - don't reload level from file each time, keep in memory

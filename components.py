@@ -48,3 +48,4 @@ class MapDimension:
 class FOV:
     transparent: np.ndarray
     explored: np.ndarray
+    visible: np.ndarray

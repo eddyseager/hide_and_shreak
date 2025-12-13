@@ -23,11 +23,10 @@ def main() -> None:
     level = 0
     create_map_dimension()
     create_level(level)
-    create_fov(level)
-    load_level(level)
     _, (_, stair_up) = esper.get_components(StairsUp, Position)[0]
     create_player(stair_up.x, stair_up.y, level)
-    esper.add_processor(Draw())
+    esper.add_processor(Draw(), 5)
+    esper.add_processor(Update_FOV(), 3)
     esper.set_handler('tcod_event', on_event)
 
     with tcod.context.new(tileset=tileset, sdl_window_flags=tcod.context.SDL_WINDOW_RESIZABLE | tcod.context.SDL_WINDOW_MAXIMIZED) as context:
