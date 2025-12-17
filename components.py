@@ -3,11 +3,18 @@ import numpy as np
 
 MAP_WIDTH = 60
 MAP_HEIGHT = 24
+SPAWN_COUNT = 20
 
-class Player:
+CHAR_PLAYER = "@"
+CHAR_ENEMY = "&"
+CHAR_SPAWN_POINT = "§"
+CHAR_UP_STAIR = "<"
+CHAR_DOWN_STAIR = ">"
+
+class Map_Object:
     pass
 
-class Gold:
+class Player:
     pass
 
 class Wall:
@@ -20,6 +27,12 @@ class StairsDown:
     pass
 
 class StairsUp:
+    pass
+
+class Enemy:
+    pass
+
+class SpawnPoint:
     pass
 
 @component
@@ -49,3 +62,7 @@ class FOV:
     transparent: np.ndarray
     explored: np.ndarray
     visible: np.ndarray
+
+@component
+class Counter:
+    val: int

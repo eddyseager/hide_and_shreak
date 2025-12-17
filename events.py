@@ -36,6 +36,8 @@ def move_map(dx: int, dy: int) -> None:
     if dim.in_bounds(x, y) and not is_wall(x, y):
         pos.x = x
         pos.y = y
+        e, counter = esper.get_component(Counter)[0]
+        counter.val += 1
 
 def is_wall(x: int, y: int):
     for e, (_, pos) in esper.get_components(Wall, Position):

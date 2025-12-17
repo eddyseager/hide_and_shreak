@@ -25,8 +25,10 @@ def main() -> None:
     create_level(level)
     _, (_, stair_up) = esper.get_components(StairsUp, Position)[0]
     create_player(stair_up.x, stair_up.y, level)
+    create_counter()
     esper.add_processor(Draw(), 5)
     esper.add_processor(Update_FOV(), 3)
+    esper.add_processor(Monster_Spawn(), 2)
     esper.set_handler('tcod_event', on_event)
 
     with tcod.context.new(tileset=tileset, sdl_window_flags=tcod.context.SDL_WINDOW_RESIZABLE | tcod.context.SDL_WINDOW_MAXIMIZED) as context:
