@@ -1,5 +1,6 @@
 import esper
 import tcod.event
+from move import move_map
 from components import *
 import tcod.console
 from entities import create_level, remove_level, load_level, create_player
@@ -11,41 +12,30 @@ def on_event(event: tcod.event.Event) -> None:
         case tcod.event.Quit():
             raise SystemExit
         case tcod.event.KeyDown(sym=tcod.event.KeySym.LEFT):
-            move_map(-1, 0)
+            _move_player(-1, 0)
         case tcod.event.KeyDown(sym=tcod.event.KeySym.RIGHT):
-            move_map(1, 0)
+            _move_player(1, 0)
         case tcod.event.KeyDown(sym=tcod.event.KeySym.UP):
-            move_map(0, -1)
+            _move_player(0, -1)
         case tcod.event.KeyDown(sym=tcod.event.KeySym.DOWN):
-            move_map(0, 1)
+            _move_player(0, 1)
         case tcod.event.KeyDown(sym=tcod.event.KeySym.PERIOD, mod=tcod.event.Modifier.LSHIFT):
-            change_level_down()
+            _change_level_down()
         case tcod.event.KeyDown(sym=tcod.event.KeySym.PERIOD, mod=tcod.event.Modifier.RSHIFT):
-            change_level_down()
+            _change_level_down()
         case tcod.event.KeyDown(sym=tcod.event.KeySym.COMMA, mod=tcod.event.Modifier.LSHIFT):
-            change_level_up()
+            _change_level_up()
         case tcod.event.KeyDown(sym=tcod.event.KeySym.COMMA, mod=tcod.event.Modifier.RSHIFT):
-            change_level_up()
+            _change_level_up()
 
-def move_map(dx: int, dy: int) -> None:
+def _move_player(dx: int, dy: int) -> None:
     _, (_, pos) = esper.get_components(Player, Position)[0]
-    _, dim = esper.get_component(MapDimension)[0]
-    x = pos.x + dx
-    y = pos.y + dy
+    move_map(dx, dy, pos)
 
-    if dim.in_bounds(x, y) and not blocks_movement(x, y):
-        pos.x = x
-        pos.y = y
-        e, counter = esper.get_component(Counter)[0]
-        counter.val += 1
+    e, counter = esper.get_component(Counter)[0]
+    counter.val += 1
 
-def blocks_movement(x: int, y: int):
-    for e, (_, pos) in esper.get_components(Blocks_Movement, Position):
-        if pos.x == x and pos.y == y:
-            return True
-    return False
-
-def change_level_down() -> None:
+def _change_level_down() -> None:
     #there might not be any stairs down
     try:
         _, (_, stair_pos) = esper.get_components(StairsDown, Position)[0]
@@ -60,7 +50,7 @@ def change_level_down() -> None:
         _, (_, stair_up) = esper.get_components(StairsUp, Position)[0]
         create_player(stair_up.x, stair_up.y, level)
 
-def change_level_up() -> None:
+def _change_level_up() -> None:
     _, (_, stair_pos) = esper.get_components(StairsUp, Position)[0]
     _, (_, player_pos, player_level) = esper.get_components(Player, Position, Level)[0]
     if stair_pos == player_pos:

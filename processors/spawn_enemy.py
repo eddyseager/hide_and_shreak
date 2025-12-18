@@ -1,3 +1,4 @@
+from typing import Optional
 import esper
 from components import *
 import random as rng
@@ -10,11 +11,11 @@ class Spawn_Enemy(esper.Processor):
         if counter.val == SPAWN_COUNT:
             counter.val = 0
 
-            pos = self.spawn_at()
+            pos = self._spawn_at()
             if pos:
                 create_enemy(pos.x, pos.y)
 
-    def spawn_at(self) -> Position:
+    def _spawn_at(self) -> Optional[Position]:
         spawns = esper.get_components(SpawnPoint, Position)
 
         while (len(spawns) > 0):

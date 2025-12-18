@@ -39,6 +39,9 @@ class Enemy:
 class SpawnPoint:
     pass
 
+class RandomMover:
+    pass
+
 @component
 class Level:
     val: int

@@ -32,7 +32,7 @@ def create_player(x: int, y: int, level: int) -> None:
     esper.create_entity(Map_Object(), Player(), Position(x, y), Graphic(CHAR_PLAYER, (255, 255, 255)), Level(level))
 
 def create_enemy(x: int, y: int) -> None:
-    esper.create_entity(Blocks_Movement(), Map_Object(), Enemy(), Position(x, y), Graphic(CHAR_ENEMY, (255, 0, 0)))
+    esper.create_entity(RandomMover(), Blocks_Movement(), Map_Object(), Enemy(), Position(x, y), Graphic(CHAR_ENEMY, (255, 0, 0)))
 
 def create_spawn_point(x: int, y: int) -> None:
     esper.create_entity(Blocks_Movement(), Map_Object(), SpawnPoint(), Position(x, y), Graphic(CHAR_SPAWN_POINT, (255, 0, 0)))
@@ -76,4 +76,3 @@ def create_level(level: int) -> None:
 
 def create_counter() -> None:
     e = esper.create_entity(Counter(0))
-    print (e)
