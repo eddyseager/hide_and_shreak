@@ -8,8 +8,10 @@ import esper
 from random import Random
 from components import *
 from events import on_event
-from processors import *
 from entities import *
+from processors.draw import Draw
+from processors.update_fov import Update_FOV
+from processors.spawn_enemy import Spawn_Enemy
 
 def main() -> None:
 
@@ -28,7 +30,7 @@ def main() -> None:
     create_counter()
     esper.add_processor(Draw(), 5)
     esper.add_processor(Update_FOV(), 3)
-    esper.add_processor(Monster_Spawn(), 2)
+    esper.add_processor(Spawn_Enemy(), 2)
     esper.set_handler('tcod_event', on_event)
 
     with tcod.context.new(tileset=tileset, sdl_window_flags=tcod.context.SDL_WINDOW_RESIZABLE | tcod.context.SDL_WINDOW_MAXIMIZED) as context:
