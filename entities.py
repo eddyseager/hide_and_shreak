@@ -32,10 +32,10 @@ def create_player(x: int, y: int, level: int) -> None:
     esper.create_entity(Map_Object(), Player(), Position(x, y), Graphic(CHAR_PLAYER, (255, 255, 255)), Level(level))
 
 def create_enemy(x: int, y: int) -> None:
-    esper.create_entity(Map_Object(), Enemy(), Position(x, y), Graphic(CHAR_ENEMY, (255, 0, 0)))
+    esper.create_entity(Blocks_Movement(), Map_Object(), Enemy(), Position(x, y), Graphic(CHAR_ENEMY, (255, 0, 0)))
 
 def create_spawn_point(x: int, y: int) -> None:
-    esper.create_entity(Map_Object(), SpawnPoint(), Position(x, y), Graphic(CHAR_SPAWN_POINT, (255, 0, 0)))
+    esper.create_entity(Blocks_Movement(), Map_Object(), SpawnPoint(), Position(x, y), Graphic(CHAR_SPAWN_POINT, (255, 0, 0)))
 
 def create_stairs_down(x: int, y: int) -> None:
     esper.create_entity(Map_Object(), StairsDown(), Position(x, y), Graphic(CHAR_DOWN_STAIR, (255, 255, 255)))
@@ -44,7 +44,7 @@ def create_stairs_up(x: int, y: int) -> None:
     esper.create_entity(Map_Object(), StairsUp(), Position(x, y), Graphic(CHAR_UP_STAIR, (255, 255, 255)))
 
 def create_wall(x: int, y: int, g: str, level: int) -> None:
-    esper.create_entity(Map_Object(), Wall(), Position(x, y), Graphic(g, (255, 255, 255)))
+    esper.create_entity(Blocks_Movement(), Map_Object(), Wall(), Position(x, y), Graphic(g, (255, 255, 255)))
 
     #Walls are not transparent
     for _, (fov, l) in esper.get_components(FOV, Level):

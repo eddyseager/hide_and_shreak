@@ -11,7 +11,11 @@ CHAR_SPAWN_POINT = "§"
 CHAR_UP_STAIR = "<"
 CHAR_DOWN_STAIR = ">"
 
+#A visible object on the map (not a floor)
 class Map_Object:
+    pass
+
+class Blocks_Movement:
     pass
 
 class Player:

@@ -33,14 +33,14 @@ def move_map(dx: int, dy: int) -> None:
     x = pos.x + dx
     y = pos.y + dy
 
-    if dim.in_bounds(x, y) and not is_wall(x, y):
+    if dim.in_bounds(x, y) and not blocks_movement(x, y):
         pos.x = x
         pos.y = y
         e, counter = esper.get_component(Counter)[0]
         counter.val += 1
 
-def is_wall(x: int, y: int):
-    for e, (_, pos) in esper.get_components(Wall, Position):
+def blocks_movement(x: int, y: int):
+    for e, (_, pos) in esper.get_components(Blocks_Movement, Position):
         if pos.x == x and pos.y == y:
             return True
     return False
