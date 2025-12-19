@@ -3,6 +3,7 @@ from components import *
 from random import Random
 import os
 import numpy as np
+import tcod.path
 
 def load_level(level: int) -> None:
     with open(f'levels{os.sep}{level}.level') as file:
@@ -32,7 +33,8 @@ def create_player(x: int, y: int, level: int) -> None:
     esper.create_entity(Map_Object(), Player(), Position(x, y), Graphic(CHAR_PLAYER, (255, 255, 255)), Level(level))
 
 def create_enemy(x: int, y: int) -> None:
-    esper.create_entity(RandomMover(), Blocks_Movement(), Map_Object(), Enemy(), Position(x, y), Graphic(CHAR_ENEMY, (255, 0, 0)))
+    distance = tcod.path.maxarray((MAP_WIDTH, MAP_HEIGHT), dtype=np.int32, order="F")
+    esper.create_entity(Dijkstra(distance = distance), PlayerMover(), Blocks_Movement(), Map_Object(), Enemy(), Position(x, y), Graphic(CHAR_ENEMY, (255, 0, 0)))
 
 def create_spawn_point(x: int, y: int) -> None:
     esper.create_entity(Blocks_Movement(), Map_Object(), SpawnPoint(), Position(x, y), Graphic(CHAR_SPAWN_POINT, (255, 0, 0)))

@@ -39,7 +39,7 @@ class Enemy:
 class SpawnPoint:
     pass
 
-class RandomMover:
+class PlayerMover:
     pass
 
 @component
@@ -69,6 +69,11 @@ class FOV:
     transparent: np.ndarray
     explored: np.ndarray
     visible: np.ndarray
+
+@component
+class Dijkstra:
+    #Not sure if this is needed or if will be recomputed each time
+    distance: np.ndarray
 
 @component
 class Counter:
