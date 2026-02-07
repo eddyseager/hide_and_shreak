@@ -30,6 +30,6 @@ def move_to_player():
                 #print(d.distance)
                 path = tcod.path.hillclimb2d(d.distance, (pos.x, pos.y), True, False)
                 list = path[1:].tolist()
-                print(list)
+                #print(list)
                 if list:
                     (pos.x, pos.y) = list.pop(0)

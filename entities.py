@@ -6,7 +6,7 @@ import numpy as np
 import tcod.path
 
 def load_level(level: int) -> None:
-    with open(f'levels{os.sep}{level}.level') as file:
+    with open(f'levels{os.sep}{level}.level', encoding="utf-8") as file:
         x = 0
         y = 0
         for line in file:
