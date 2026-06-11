@@ -71,10 +71,5 @@ class FOV:
     visible: np.ndarray
 
 @component
-class Dijkstra:
-    #Not sure if this is needed or if will be recomputed each time
-    distance: np.ndarray
-
-@component
 class Counter:
     val: int
