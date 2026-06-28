@@ -1,5 +1,6 @@
 import esper
 import tcod.path
+import numpy as np
 from components import *
 
 def move_map(dx: int, dy: int, pos: Position) -> None:

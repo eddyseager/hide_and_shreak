@@ -10,8 +10,8 @@ def load_level(level: int) -> None:
         x = 0
         y = 0
         for line in file:
-            x =0
-            for c in line:
+            x = 0
+            for c in line.rstrip("\r\n"):
                 if c == CHAR_UP_STAIR:
                     create_stairs_up(x, y)
                 elif c == CHAR_DOWN_STAIR:
