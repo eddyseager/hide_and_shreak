@@ -13,6 +13,7 @@ from entities import *
 from processors.draw import Draw
 from processors.update_fov import Update_FOV
 from processors.spawn_enemy import Spawn_Enemy
+from processors.move_enemy import Move_Enemy
 
 def main() -> None:
     pygame.mixer.init()
@@ -32,9 +33,11 @@ def main() -> None:
     _, (_, stair_up) = esper.get_components(StairsUp, Position)[0]
     create_player(stair_up.x, stair_up.y, level)
     create_counter()
-    esper.add_processor(Draw(), 5)
-    esper.add_processor(Update_FOV(), 3)
-    esper.add_processor(Spawn_Enemy(), 2)
+    
+    esper.add_processor(Move_Enemy(), 6)
+    esper.add_processor(Update_FOV(), 5)
+    esper.add_processor(Spawn_Enemy(), 3)
+    esper.add_processor(Draw(), 1)
     esper.set_handler('tcod_event', on_event)
 
     with tcod.context.new(tileset=tileset, sdl_window_flags=tcod.context.SDL_WINDOW_RESIZABLE | tcod.context.SDL_WINDOW_MAXIMIZED) as context:

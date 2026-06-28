@@ -1,6 +1,6 @@
 import esper
 import tcod.event
-from move import move_map, move_to_player
+from move import move_map
 from components import *
 import tcod.console
 from entities import create_level, remove_level, load_level, create_player
@@ -12,16 +12,12 @@ def on_event(event: tcod.event.Event) -> None:
             raise SystemExit
         case tcod.event.KeyDown(sym=tcod.event.KeySym.LEFT):
             _move_player(-1, 0)
-            move_to_player()
         case tcod.event.KeyDown(sym=tcod.event.KeySym.RIGHT):
             _move_player(1, 0)
-            move_to_player()
         case tcod.event.KeyDown(sym=tcod.event.KeySym.UP):
             _move_player(0, -1)
-            move_to_player()
         case tcod.event.KeyDown(sym=tcod.event.KeySym.DOWN):
             _move_player(0, 1)
-            move_to_player()
         case tcod.event.KeyDown(sym=tcod.event.KeySym.PERIOD, mod=tcod.event.Modifier.LSHIFT):
             _change_level_down()
         case tcod.event.KeyDown(sym=tcod.event.KeySym.PERIOD, mod=tcod.event.Modifier.RSHIFT):

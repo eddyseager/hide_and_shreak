@@ -6,11 +6,17 @@ from entities import create_enemy
 
 class Spawn_Enemy(esper.Processor):
 
+    def __init__(self):
+        super().__init__()
+        self.last_processed_turn = 0
+
     def process(self):
         e, counter = esper.get_component(Counter)[0]
-        if counter.val == SPAWN_COUNT:
-            counter.val = 0
+        if counter.val == self.last_processed_turn:
+            return
+        self.last_processed_turn = counter.val
 
+        if counter.val > 0 and counter.val % SPAWN_COUNT == 0:
             pos = self._spawn_at()
             if pos:
                 create_enemy(pos.x, pos.y)
