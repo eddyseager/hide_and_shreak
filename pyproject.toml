@@ -7,5 +7,6 @@ requires-python = ">=3.11"
 dependencies = [
     "esper>=3.4",
     "numpy>=2.3.5",
+    "pygame>=2.6.1",
     "tcod>=19.6.0",
 ]

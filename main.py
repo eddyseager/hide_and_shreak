@@ -5,6 +5,7 @@ import tcod.context
 import tcod.event
 import tcod.tileset
 import esper
+import pygame
 from random import Random
 from components import *
 from events import on_event
@@ -14,6 +15,9 @@ from processors.update_fov import Update_FOV
 from processors.spawn_enemy import Spawn_Enemy
 
 def main() -> None:
+    pygame.mixer.init()
+    pygame.mixer.music.load("music/gameplay.mp3")
+    pygame.mixer.music.play(-1)
 
     tileset = tcod.tileset.load_tilesheet(
         "fonts/Redjack17.png", columns=16, rows=16, charmap=tcod.tileset.CHARMAP_CP437
