@@ -1,9 +1,6 @@
 from dataclasses import dataclass as component
 import numpy as np
-
-MAP_WIDTH = 60
-MAP_HEIGHT = 24
-SPAWN_COUNT = 20
+from constants import MAP_WIDTH, MAP_HEIGHT, SPAWN_COUNT
 
 
 #A visible object on the map (not a floor)

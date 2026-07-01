@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import esper
 import pygame
 from random import Random
@@ -10,8 +11,7 @@ from processors.draw import Draw
 from processors.update_fov import Update_FOV
 from processors.spawn_enemy import Spawn_Enemy
 from processors.move_enemy import Move_Enemy
-
-TILE_SIZE = 22
+from constants import *
 
 def main() -> None:
     pygame.init()
@@ -19,7 +19,10 @@ def main() -> None:
     pygame.mixer.music.load("music/gameplay.mp3")
     pygame.mixer.music.play(-1)
 
-    screen = pygame.display.set_mode((MAP_WIDTH * TILE_SIZE, MAP_HEIGHT * TILE_SIZE))
+    # Initialize standard window size with RESIZABLE and SCALED flags.
+    # This creates a virtual 1280x640 canvas that scales dynamically to fill any window or fullscreen Space.
+    screen = pygame.display.set_mode((VIEW_WIDTH * TILE_SIZE, VIEW_HEIGHT * TILE_SIZE), pygame.RESIZABLE | pygame.SCALED)
+
     pygame.display.set_caption("Hide and Shreak")
     clock = pygame.time.Clock()
 
@@ -33,7 +36,7 @@ def main() -> None:
     esper.add_processor(Move_Enemy(), 6)
     esper.add_processor(Update_FOV(), 5)
     esper.add_processor(Spawn_Enemy(), 3)
-    esper.add_processor(Draw(screen, TILE_SIZE), 1)
+    esper.add_processor(Draw(screen, TILE_SIZE, VIEW_WIDTH, VIEW_HEIGHT), 1)
 
     running = True
     while running:
@@ -50,6 +53,9 @@ def main() -> None:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            elif event.type == TOGGLE_DISPLAY_EVENT:
+                pygame.display.toggle_fullscreen()
+                
             elif event.type == pygame.KEYDOWN:
                 on_event(event)
 

@@ -3,10 +3,12 @@ import pygame
 from components import *
 
 class Draw(esper.Processor):
-    def __init__(self, screen, tile_size=22):
+    def __init__(self, screen, tile_size, view_width, view_height):
         super().__init__()
         self.screen = screen
         self.tile_size = tile_size
+        self.view_width = view_width
+        self.view_height = view_height
         
         # Load the monochrome transparent sheets
         prefix = "assets/hexanys_roguelike_tiles_0.3.0/Tilesheets/Transparent"
@@ -60,15 +62,30 @@ class Draw(esper.Processor):
 
         assert active_fov is not None, f"Active FOV map not found for level {player_level.val}!"
 
+        # Calculate camera offset to center on player
+        camera_x = player_pos.x - self.view_width // 2
+        camera_y = player_pos.y - self.view_height // 2
+
+        # Clamp camera to map boundaries to avoid showing out-of-bounds void
+        camera_x = max(0, min(camera_x, MAP_WIDTH - self.view_width))
+        camera_y = max(0, min(camera_y, MAP_HEIGHT - self.view_height))
+
         # Draw map & entities
         for ent, (pos, graphic) in esper.get_components(Position, Graphic):
+            # Calculate screen-space position
+            screen_x = pos.x - camera_x
+            screen_y = pos.y - camera_y
+
+            # Clip rendering to the viewport
+            if not (0 <= screen_x < self.view_width and 0 <= screen_y < self.view_height):
+                continue
+
             # Check visibility
             if active_fov.visible[pos.x, pos.y]:
                 visible = True
             elif active_fov.explored[pos.x, pos.y] and not esper.has_component(ent, Enemy):
                 visible = False
             else:
-                # Not explored / hidden enemy
                 continue
 
             # Render the pre-configured sprite details directly
@@ -77,11 +94,13 @@ class Draw(esper.Processor):
                 color = (int(color[0] * 0.4), int(color[1] * 0.4), int(color[2] * 0.4))
 
             sprite = self.get_sprite(graphic.sheet, graphic.col, graphic.row, color)
-            rect = pygame.Rect(pos.x * self.tile_size, pos.y * self.tile_size, self.tile_size, self.tile_size)
+            rect = pygame.Rect(screen_x * self.tile_size, screen_y * self.tile_size, self.tile_size, self.tile_size)
             self.screen.blit(sprite, rect)
 
         # Draw player last
+        player_screen_x = player_pos.x - camera_x
+        player_screen_y = player_pos.y - camera_y
         player_color = player_graphic.fg
         player_sprite = self.get_sprite(player_graphic.sheet, player_graphic.col, player_graphic.row, player_color)
-        player_rect = pygame.Rect(player_pos.x * self.tile_size, player_pos.y * self.tile_size, self.tile_size, self.tile_size)
+        player_rect = pygame.Rect(player_screen_x * self.tile_size, player_screen_y * self.tile_size, self.tile_size, self.tile_size)
         self.screen.blit(player_sprite, player_rect)

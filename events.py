@@ -3,6 +3,7 @@ import pygame
 from move import move_map
 from components import *
 from entities import create_level, remove_level, load_level, create_player
+from constants import TOGGLE_DISPLAY_EVENT
 
 def on_event(event: pygame.event.Event) -> None:
     if event.type == pygame.KEYDOWN:
@@ -22,6 +23,10 @@ def on_event(event: pygame.event.Event) -> None:
             mods = pygame.key.get_mods()
             if mods & pygame.KMOD_SHIFT:
                 _change_level_up()
+        elif event.key == pygame.K_ESCAPE:
+            raise SystemExit
+        elif event.key == pygame.K_f:
+            pygame.event.post(pygame.event.Event(TOGGLE_DISPLAY_EVENT))
 
 def _move_player(dx: int, dy: int) -> None:
     _, (_, pos) = esper.get_components(Player, Position)[0]
