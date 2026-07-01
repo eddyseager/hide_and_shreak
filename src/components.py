@@ -24,6 +24,15 @@ class Wall:
 class Door:
     is_open: bool = False
 
+@component
+class MovementAnim:
+    start_x: int
+    start_y: int
+    target_x: int
+    target_y: int
+    start_time: int
+    duration: int = 150
+
 class Floor:
     pass
 

@@ -47,6 +47,16 @@ def _move_player(dx: int, dy: int) -> None:
         # Open door if player stepped on one
         check_and_open_door(pos.x, pos.y)
         
+        # Attach movement animation component to the player
+        player_ent = esper.get_components(Player, Position)[0][0]
+        esper.add_component(player_ent, MovementAnim(
+            start_x=pos.x - dx,
+            start_y=pos.y - dy,
+            target_x=pos.x,
+            target_y=pos.y,
+            start_time=pygame.time.get_ticks()
+        ))
+        
         # Successful step: increment general turn counter
         e, counter = esper.get_component(Counter)[0]
         counter.val += 1

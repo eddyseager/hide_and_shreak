@@ -109,7 +109,7 @@ class Draw(esper.Processor):
         # Get player level & details
         player_query = esper.get_components(Player, Position, Graphic, Level)
         assert player_query, "Active player entity not found in ECS world!"
-        _, (player, player_pos, player_graphic, player_level) = player_query[0]
+        player_ent, (player, player_pos, player_graphic, player_level) = player_query[0]
 
         # Trigger screen shake if player was hit this frame (even if they healed on the same turn)
         if player.just_hit:
@@ -134,9 +134,28 @@ class Draw(esper.Processor):
 
         assert active_fov is not None, f"Active FOV map not found for level {player_level.val}!"
 
-        # Calculate camera offset to center on player
-        camera_x = player_pos.x - self.view_width // 2
-        camera_y = player_pos.y - self.view_height // 2
+        # Fetch current time for animation progress
+        time = pygame.time.get_ticks()
+        removals = []
+
+        # Get visual position for camera tracking
+        player_visual_x = player_pos.x
+        player_visual_y = player_pos.y
+        player_hop_y = 0
+        if esper.has_component(player_ent, MovementAnim):
+            anim = esper.component_for_entity(player_ent, MovementAnim)
+            elapsed = time - anim.start_time
+            t = elapsed / anim.duration
+            if t >= 1.0:
+                removals.append((player_ent, MovementAnim))
+            else:
+                player_visual_x = anim.start_x + (anim.target_x - anim.start_x) * t
+                player_visual_y = anim.start_y + (anim.target_y - anim.start_y) * t
+                player_hop_y = -int(math.sin(t * math.pi) * (self.tile_size // 4))
+
+        # Calculate camera offset to center on player's visual path
+        camera_x = player_visual_x - self.view_width // 2
+        camera_y = player_visual_y - self.view_height // 2
 
         # Clamp camera to map boundaries to avoid showing out-of-bounds void
         camera_x = max(0, min(camera_x, MAP_WIDTH - self.view_width))
@@ -144,15 +163,36 @@ class Draw(esper.Processor):
 
         # Draw map & entities
         for ent, (pos, graphic) in esper.get_components(Position, Graphic):
-            # Calculate screen-space position
-            screen_x = pos.x - camera_x
-            screen_y = pos.y - camera_y
+            # Determine visual positions (interpolated if animating)
+            visual_x = pos.x
+            visual_y = pos.y
+            hop_y = 0
+            
+            if esper.has_component(ent, MovementAnim):
+                anim = esper.component_for_entity(ent, MovementAnim)
+                elapsed = time - anim.start_time
+                t = elapsed / anim.duration
+                if t >= 1.0:
+                    removals.append((ent, MovementAnim))
+                else:
+                    visual_x = anim.start_x + (anim.target_x - anim.start_x) * t
+                    visual_y = anim.start_y + (anim.target_y - anim.start_y) * t
+                    
+                    # Apply a lively hop to the player, and a heavy, low-profile hop to enemies
+                    if not esper.has_component(ent, Enemy):
+                        hop_y = -int(math.sin(t * math.pi) * (self.tile_size // 4))
+                    else:
+                        hop_y = -int(math.sin(t * math.pi) * (self.tile_size // 8))  # Slow, heavy shuffle
 
-            # Clip rendering to the viewport
-            if not (0 <= screen_x < self.view_width and 0 <= screen_y < self.view_height):
+            # Calculate screen-space position
+            screen_x = visual_x - camera_x
+            screen_y = visual_y - camera_y
+
+            # Clip rendering to the viewport (with 1-tile padding for smooth entry/exit)
+            if not (-1 <= screen_x < self.view_width + 1 and -1 <= screen_y < self.view_height + 1):
                 continue
 
-            # Check visibility
+            # Check visibility at the logical tile position
             if active_fov.visible[pos.x, pos.y]:
                 visible = True
             elif active_fov.explored[pos.x, pos.y] and not esper.has_component(ent, Enemy):
@@ -166,15 +206,15 @@ class Draw(esper.Processor):
                 color = (int(color[0] * 0.4), int(color[1] * 0.4), int(color[2] * 0.4))
 
             sprite = self.get_sprite(graphic.sheet, graphic.col, graphic.row, color)
-            rect = pygame.Rect(screen_x * self.tile_size + shake_x, screen_y * self.tile_size, self.tile_size, self.tile_size)
+            rect = pygame.Rect(screen_x * self.tile_size + shake_x, screen_y * self.tile_size + hop_y, self.tile_size, self.tile_size)
             self.screen.blit(sprite, rect)
 
-        # Draw player last
-        player_screen_x = player_pos.x - camera_x
-        player_screen_y = player_pos.y - camera_y
+        # Draw player last at visual coordinates
+        player_screen_x = player_visual_x - camera_x
+        player_screen_y = player_visual_y - camera_y
         player_color = player_graphic.fg
         player_sprite = self.get_sprite(player_graphic.sheet, player_graphic.col, player_graphic.row, player_color)
-        player_rect = pygame.Rect(player_screen_x * self.tile_size + shake_x, player_screen_y * self.tile_size, self.tile_size, self.tile_size)
+        player_rect = pygame.Rect(player_screen_x * self.tile_size + shake_x, player_screen_y * self.tile_size + player_hop_y, self.tile_size, self.tile_size)
         self.screen.blit(player_sprite, player_rect)
 
         # Draw smooth radial vignette overlay centered on the viewport based on health state
@@ -192,3 +232,8 @@ class Draw(esper.Processor):
             sub_text = sub_font.render("Press ESC to Quit", True, (200, 200, 200))
             sub_rect = sub_text.get_rect(center=(self.view_width * self.tile_size // 2, self.view_height * self.tile_size // 2 + 30))
             self.screen.blit(sub_text, sub_rect)
+
+        # Clean up finished animations
+        for ent, comp_class in removals:
+            if esper.has_component(ent, comp_class):
+                esper.remove_component(ent, comp_class)

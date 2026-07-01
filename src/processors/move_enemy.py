@@ -1,4 +1,5 @@
 import esper
+import pygame
 import tcod.path
 import numpy as np
 from components import *
@@ -15,6 +16,10 @@ class Move_Enemy(esper.Processor):
         if counter.val == self.last_processed_turn:
             return
         self.last_processed_turn = counter.val
+
+        # Enemies move at 50% speed: skip movement on odd turns
+        if counter.val % 2 != 0:
+            return
 
         player_query = esper.get_components(Player, Position, Level)
         assert player_query, "Active player entity not found in ECS world during enemy movement phase!"
@@ -55,5 +60,18 @@ class Move_Enemy(esper.Processor):
                             break
                             
                 if not is_blocked:
-                    pos.x, pos.y = new_x, new_y
+                    old_x = pos.x
+                    old_y = pos.y
+                    pos.x = new_x
+                    pos.y = new_y
                     check_and_open_door(new_x, new_y)
+                    
+                    # Attach movement animation component with longer duration for slow/heavy movement
+                    esper.add_component(e, MovementAnim(
+                        start_x=old_x,
+                        start_y=old_y,
+                        target_x=new_x,
+                        target_y=new_y,
+                        start_time=pygame.time.get_ticks(),
+                        duration=350
+                    ))
