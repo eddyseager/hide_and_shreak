@@ -1,3 +1,4 @@
+import math
 import esper
 import pygame
 from components import *
@@ -18,6 +19,42 @@ class Draw(esper.Processor):
         
         # Sprite cache: (sheet, col, row, color) -> Surface
         self.sprite_cache = {}
+        self.vignette_surf = None
+
+    def get_vignette(self, w, h):
+        if self.vignette_surf is not None and self.vignette_surf.get_size() == (w, h):
+            return self.vignette_surf
+
+        # Generate a high-resolution, perfectly smooth gradient vignette ONCE
+        # We draw it at 1/2 resolution and smoothscale it for a soft, blurry look
+        low_w = w // 2
+        low_h = h // 2
+        vignette_low = pygame.Surface((low_w, low_h), pygame.SRCALPHA)
+        vignette_low.fill((0, 0, 0, 0))
+        
+        cx, cy = low_w // 2, low_h // 2
+        max_factor = 1.414  # Covers corners of the rectangle
+        
+        # Draw 100 concentric ellipses for an extremely smooth, glitch-free gradient
+        for step in range(100, 0, -1):
+            factor = (step / 100.0) * max_factor
+            
+            ellipse_w = int(low_w * factor)
+            ellipse_h = int(low_h * factor)
+            
+            rx = cx - ellipse_w // 2
+            ry = cy - ellipse_h // 2
+            
+            norm_factor = factor / max_factor
+            alpha = int(250 * (norm_factor ** 0.65))  # Tight spotlight
+            alpha = max(0, min(alpha, 250))
+            
+            if alpha > 0:
+                rect = pygame.Rect(rx, ry, ellipse_w, ellipse_h)
+                pygame.draw.ellipse(vignette_low, (0, 0, 0, alpha), rect)
+                
+        self.vignette_surf = pygame.transform.smoothscale(vignette_low, (w, h))
+        return self.vignette_surf
 
     def get_sprite(self, sheet_name, col, row, color):
         key = (sheet_name, col, row, color)
@@ -104,3 +141,7 @@ class Draw(esper.Processor):
         player_sprite = self.get_sprite(player_graphic.sheet, player_graphic.col, player_graphic.row, player_color)
         player_rect = pygame.Rect(player_screen_x * self.tile_size, player_screen_y * self.tile_size, self.tile_size, self.tile_size)
         self.screen.blit(player_sprite, player_rect)
+
+        # Draw smooth radial vignette overlay centered on the viewport
+        vignette = self.get_vignette(self.view_width * self.tile_size, self.view_height * self.tile_size)
+        self.screen.blit(vignette, (0, 0))
