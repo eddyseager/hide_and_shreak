@@ -10,8 +10,10 @@ class Map_Object:
 class Blocks_Movement:
     pass
 
+@component
 class Player:
-    pass
+    hp: int = 3
+    max_hp: int = 3
 
 class Wall:
     pass

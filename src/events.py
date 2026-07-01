@@ -7,6 +7,18 @@ from constants import TOGGLE_DISPLAY_EVENT
 
 def on_event(event: pygame.event.Event) -> None:
     if event.type == pygame.KEYDOWN:
+        # Check player health for Game Over
+        try:
+            _, player = esper.get_component(Player)[0]
+            is_dead = player.hp <= 0
+        except IndexError:
+            is_dead = False
+
+        if is_dead:
+            if event.key == pygame.K_ESCAPE:
+                raise SystemExit
+            return
+
         if event.key == pygame.K_LEFT:
             _move_player(-1, 0)
         elif event.key == pygame.K_RIGHT:

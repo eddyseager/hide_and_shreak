@@ -19,7 +19,11 @@ class Move_Enemy(esper.Processor):
         player_query = esper.get_components(Player, Position, Level)
         if not player_query:
             return
-        _, (_, player_pos, player_level) = player_query[0]
+        _, (player, player_pos, player_level) = player_query[0]
+
+        # Stop enemy AI if the player is dead
+        if player.hp <= 0:
+            return
 
         # Find FOV for the player's level
         current_fov = None
@@ -41,5 +45,9 @@ class Move_Enemy(esper.Processor):
             path_list = path[1:].tolist()
             if path_list:
                 new_x, new_y = path_list[0]
-                if not _blocks_movement(new_x, new_y):
+                if new_x == player_pos.x and new_y == player_pos.y:
+                    # Enemy hits player: deal damage and remove enemy
+                    player.hp = max(0, player.hp - 1)
+                    esper.delete_entity(e)
+                elif not _blocks_movement(new_x, new_y):
                     pos.x, pos.y = new_x, new_y

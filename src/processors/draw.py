@@ -21,17 +21,29 @@ class Draw(esper.Processor):
         self.sprite_cache = {}
         self.vignette_surf = None
 
-    def get_vignette(self, w, h):
-        if self.vignette_surf is not None and self.vignette_surf.get_size() == (w, h):
-            return self.vignette_surf
+    def get_vignette(self, w, h, hp):
+        key = (w, h, hp)
+        if key in self.sprite_cache:
+            return self.sprite_cache[key]
 
-        # Generate a high-resolution, perfectly smooth gradient vignette ONCE
+        # Generate a high-resolution, perfectly smooth gradient vignette ONCE per health state
         # We draw it at 1/2 resolution and smoothscale it for a soft, blurry look
         low_w = w // 2
         low_h = h // 2
         vignette_low = pygame.Surface((low_w, low_h), pygame.SRCALPHA)
         vignette_low.fill((0, 0, 0, 0))
         
+        # Determine vignette color based on player hp
+        if hp == 3:
+            vignette_color = (0, 0, 0)       # Normal: Black
+        elif hp == 2:
+            vignette_color = (130, 0, 0)     # 1 hit taken: Dark red
+        elif hp == 1:
+            vignette_color = (255, 0, 0)     # 2 hits taken: Bright red
+        else:
+            vignette_color = (255, 0, 0)     # 3 hits taken (Dead): Solid red base
+            vignette_low.fill((255, 0, 0, 180)) # Fill screen with transparent red on game over
+            
         cx, cy = low_w // 2, low_h // 2
         max_factor = 1.414  # Covers corners of the rectangle
         
@@ -46,15 +58,19 @@ class Draw(esper.Processor):
             ry = cy - ellipse_h // 2
             
             norm_factor = factor / max_factor
-            alpha = int(250 * (norm_factor ** 0.65))  # Tight spotlight
+            if hp == 0:
+                # Dense red shadow closing in fully
+                alpha = int(255 * (norm_factor ** 0.45))
+            else:
+                alpha = int(250 * (norm_factor ** 0.65))  # Tight spotlight
             alpha = max(0, min(alpha, 250))
             
             if alpha > 0:
                 rect = pygame.Rect(rx, ry, ellipse_w, ellipse_h)
-                pygame.draw.ellipse(vignette_low, (0, 0, 0, alpha), rect)
+                pygame.draw.ellipse(vignette_low, (*vignette_color, alpha), rect)
                 
-        self.vignette_surf = pygame.transform.smoothscale(vignette_low, (w, h))
-        return self.vignette_surf
+        self.sprite_cache[key] = pygame.transform.smoothscale(vignette_low, (w, h))
+        return self.sprite_cache[key]
 
     def get_sprite(self, sheet_name, col, row, color):
         key = (sheet_name, col, row, color)
@@ -88,7 +104,7 @@ class Draw(esper.Processor):
         # Get player level & details
         player_query = esper.get_components(Player, Position, Graphic, Level)
         assert player_query, "Active player entity not found in ECS world!"
-        _, (_, player_pos, player_graphic, player_level) = player_query[0]
+        _, (player, player_pos, player_graphic, player_level) = player_query[0]
 
         # Get active FOV for the player's current level
         active_fov = None
@@ -142,6 +158,18 @@ class Draw(esper.Processor):
         player_rect = pygame.Rect(player_screen_x * self.tile_size, player_screen_y * self.tile_size, self.tile_size, self.tile_size)
         self.screen.blit(player_sprite, player_rect)
 
-        # Draw smooth radial vignette overlay centered on the viewport
-        vignette = self.get_vignette(self.view_width * self.tile_size, self.view_height * self.tile_size)
+        # Draw smooth radial vignette overlay centered on the viewport based on health state
+        vignette = self.get_vignette(self.view_width * self.tile_size, self.view_height * self.tile_size, player.hp)
         self.screen.blit(vignette, (0, 0))
+
+        # Render Game Over text if player health is 0
+        if player.hp <= 0:
+            font = pygame.font.Font(None, 72)
+            go_text = font.render("GAME OVER", True, (255, 255, 255))
+            go_rect = go_text.get_rect(center=(self.view_width * self.tile_size // 2, self.view_height * self.tile_size // 2 - 25))
+            self.screen.blit(go_text, go_rect)
+            
+            sub_font = pygame.font.Font(None, 36)
+            sub_text = sub_font.render("Press ESC to Quit", True, (200, 200, 200))
+            sub_rect = sub_text.get_rect(center=(self.view_width * self.tile_size // 2, self.view_height * self.tile_size // 2 + 30))
+            self.screen.blit(sub_text, sub_rect)
