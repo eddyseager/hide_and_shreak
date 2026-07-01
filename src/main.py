@@ -15,9 +15,12 @@ from processors.combat import Combat
 from constants import *
 
 def main() -> None:
+    # Pre-initialize the mixer with a low buffer size (512 bytes) to eliminate SFX latency
+    pygame.mixer.pre_init(44100, -16, 2, 512)
     pygame.init()
     pygame.mixer.init()
     pygame.mixer.music.load("music/gameplay.mp3")
+    pygame.mixer.music.set_volume(0.4)
     pygame.mixer.music.play(-1)
 
     # Initialize standard window size with RESIZABLE and SCALED flags.

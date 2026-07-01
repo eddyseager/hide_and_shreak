@@ -1,7 +1,20 @@
 import esper
+import pygame
 from components import *
 
 class Combat(esper.Processor):
+    def __init__(self):
+        super().__init__()
+        try:
+            self.hit_sound = pygame.mixer.Sound("sounds/hit.mp3")
+        except (pygame.error, FileNotFoundError):
+            self.hit_sound = None
+            
+        try:
+            self.die_sound = pygame.mixer.Sound("sounds/die.mp3")
+        except (pygame.error, FileNotFoundError):
+            self.die_sound = None
+
     def process(self):
         player_query = esper.get_components(Player, Position)
         assert player_query, "Active player entity not found in ECS world during combat phase!"
@@ -18,4 +31,13 @@ class Combat(esper.Processor):
                 player.hp = max(0, player.hp - 1)
                 player.steps_since_hit = 0
                 player.just_hit = True
+                
+                # Play corresponding sound effect based on remaining HP
+                if player.hp <= 0:
+                    if self.die_sound:
+                        self.die_sound.play()
+                else:
+                    if self.hit_sound:
+                        self.hit_sound.play()
+                    
                 esper.delete_entity(e)
