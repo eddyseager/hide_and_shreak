@@ -28,7 +28,7 @@ class Spawn_Enemy(esper.Processor):
 
             #Get a random spawn point
             i = rng.randrange(len(spawns))
-            _, (_, spawn) = spawns.pop(i)
+            e, (_, spawn) = spawns.pop(i)
 
             positions = esper.get_components(Position, Map_Object)
 
@@ -48,13 +48,19 @@ class Spawn_Enemy(esper.Processor):
                 elif spawn.y == pos.y and spawn.x - 1 == pos.x:
                     left = False
 
+            target_pos = None
             if below:
-                return Position(spawn.x, spawn.y + 1)
+                target_pos = Position(spawn.x, spawn.y + 1)
             elif above:
-                return Position(spawn.x, spawn.y -1)
+                target_pos = Position(spawn.x, spawn.y - 1)
             elif right:
-                return Position(spawn.x + 1, spawn.y)
+                target_pos = Position(spawn.x + 1, spawn.y)
             elif left:
-                return Position(spawn.x - 1, spawn.y)
+                target_pos = Position(spawn.x - 1, spawn.y)
+
+            if target_pos:
+                # Update the spawn point (cage) graphic to column 31 (broken cage)
+                esper.component_for_entity(e, Graphic).col = 31
+                return target_pos
 
         return None

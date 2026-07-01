@@ -1,31 +1,27 @@
 import esper
-import tcod.event
+import pygame
 from move import move_map
 from components import *
-import tcod.console
 from entities import create_level, remove_level, load_level, create_player
 
-def on_event(event: tcod.event.Event) -> None:
-
-    match event:
-        case tcod.event.Quit():
-            raise SystemExit
-        case tcod.event.KeyDown(sym=tcod.event.KeySym.LEFT):
+def on_event(event: pygame.event.Event) -> None:
+    if event.type == pygame.KEYDOWN:
+        if event.key == pygame.K_LEFT:
             _move_player(-1, 0)
-        case tcod.event.KeyDown(sym=tcod.event.KeySym.RIGHT):
+        elif event.key == pygame.K_RIGHT:
             _move_player(1, 0)
-        case tcod.event.KeyDown(sym=tcod.event.KeySym.UP):
+        elif event.key == pygame.K_UP:
             _move_player(0, -1)
-        case tcod.event.KeyDown(sym=tcod.event.KeySym.DOWN):
+        elif event.key == pygame.K_DOWN:
             _move_player(0, 1)
-        case tcod.event.KeyDown(sym=tcod.event.KeySym.PERIOD, mod=tcod.event.Modifier.LSHIFT):
-            _change_level_down()
-        case tcod.event.KeyDown(sym=tcod.event.KeySym.PERIOD, mod=tcod.event.Modifier.RSHIFT):
-            _change_level_down()
-        case tcod.event.KeyDown(sym=tcod.event.KeySym.COMMA, mod=tcod.event.Modifier.LSHIFT):
-            _change_level_up()
-        case tcod.event.KeyDown(sym=tcod.event.KeySym.COMMA, mod=tcod.event.Modifier.RSHIFT):
-            _change_level_up()
+        elif event.key == pygame.K_PERIOD:
+            mods = pygame.key.get_mods()
+            if mods & pygame.KMOD_SHIFT:
+                _change_level_down()
+        elif event.key == pygame.K_COMMA:
+            mods = pygame.key.get_mods()
+            if mods & pygame.KMOD_SHIFT:
+                _change_level_up()
 
 def _move_player(dx: int, dy: int) -> None:
     _, (_, pos) = esper.get_components(Player, Position)[0]

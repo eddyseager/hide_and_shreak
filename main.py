@@ -1,9 +1,5 @@
 from __future__ import annotations
 
-import tcod.console
-import tcod.context
-import tcod.event
-import tcod.tileset
 import esper
 import pygame
 from random import Random
@@ -15,17 +11,17 @@ from processors.update_fov import Update_FOV
 from processors.spawn_enemy import Spawn_Enemy
 from processors.move_enemy import Move_Enemy
 
+TILE_SIZE = 22
+
 def main() -> None:
+    pygame.init()
     pygame.mixer.init()
     pygame.mixer.music.load("music/gameplay.mp3")
     pygame.mixer.music.play(-1)
 
-    tileset = tcod.tileset.load_tilesheet(
-        "fonts/Redjack17.png", columns=16, rows=16, charmap=tcod.tileset.CHARMAP_CP437
-    )
-    tcod.tileset.procedural_block_elements(tileset=tileset)
-    console = tcod.console.Console(MAP_WIDTH, MAP_HEIGHT, order="F")
-    esper.create_entity(console)
+    screen = pygame.display.set_mode((MAP_WIDTH * TILE_SIZE, MAP_HEIGHT * TILE_SIZE))
+    pygame.display.set_caption("Hide and Shreak")
+    clock = pygame.time.Clock()
 
     level = 0
     create_map_dimension()
@@ -37,18 +33,27 @@ def main() -> None:
     esper.add_processor(Move_Enemy(), 6)
     esper.add_processor(Update_FOV(), 5)
     esper.add_processor(Spawn_Enemy(), 3)
-    esper.add_processor(Draw(), 1)
-    esper.set_handler('tcod_event', on_event)
+    esper.add_processor(Draw(screen, TILE_SIZE), 1)
 
-    with tcod.context.new(tileset=tileset, sdl_window_flags=tcod.context.SDL_WINDOW_RESIZABLE | tcod.context.SDL_WINDOW_MAXIMIZED) as context:
+    running = True
+    while running:
+        # Run ECS processing
+        esper.process()
+        
+        # Present screen
+        pygame.display.flip()
+        
+        # Limit frame rate
+        clock.tick(30)
 
-        while True:  # Main loop
-            console.clear()  # Clear the console before any drawing
-            esper.process()
-            context.present(console, keep_aspect=True, integer_scaling=False)  # Display the console on the window
-            for event in tcod.event.wait():  # Event loop, blocks until pending events exist
-                esper.dispatch_event('tcod_event', event)  # Pass events to the state
+        # Handle inputs and events
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                on_event(event)
 
+    pygame.quit()
 
 if __name__ == "__main__":
     main()

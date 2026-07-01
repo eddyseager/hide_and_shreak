@@ -5,11 +5,6 @@ MAP_WIDTH = 60
 MAP_HEIGHT = 24
 SPAWN_COUNT = 20
 
-CHAR_PLAYER = "@"
-CHAR_ENEMY = "&"
-CHAR_SPAWN_POINT = "§"
-CHAR_UP_STAIR = "<"
-CHAR_DOWN_STAIR = ">"
 
 #A visible object on the map (not a floor)
 class Map_Object:
@@ -55,6 +50,9 @@ class Position:
 class Graphic:
     g: str
     fg: tuple[int, int, int]
+    sheet: str = ""
+    col: int = 0
+    row: int = 0
 
 @component
 class MapDimension:
