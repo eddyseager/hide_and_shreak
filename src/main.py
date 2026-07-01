@@ -11,6 +11,7 @@ from processors.draw import Draw
 from processors.update_fov import Update_FOV
 from processors.spawn_enemy import Spawn_Enemy
 from processors.move_enemy import Move_Enemy
+from processors.combat import Combat
 from constants import *
 
 def main() -> None:
@@ -35,6 +36,7 @@ def main() -> None:
     
     esper.add_processor(Move_Enemy(), 6)
     esper.add_processor(Update_FOV(), 5)
+    esper.add_processor(Combat(), 4)
     esper.add_processor(Spawn_Enemy(), 3)
     esper.add_processor(Draw(screen, TILE_SIZE, VIEW_WIDTH, VIEW_HEIGHT), 1)
 

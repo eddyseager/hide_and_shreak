@@ -17,8 +17,7 @@ class Move_Enemy(esper.Processor):
         self.last_processed_turn = counter.val
 
         player_query = esper.get_components(Player, Position, Level)
-        if not player_query:
-            return
+        assert player_query, "Active player entity not found in ECS world during enemy movement phase!"
         _, (player, player_pos, player_level) = player_query[0]
 
         # Stop enemy AI if the player is dead
@@ -45,11 +44,15 @@ class Move_Enemy(esper.Processor):
             path_list = path[1:].tolist()
             if path_list:
                 new_x, new_y = path_list[0]
-                if new_x == player_pos.x and new_y == player_pos.y:
-                    # Enemy hits player: deal damage, reset healing steps, trigger shake flag, and remove enemy
-                    player.hp = max(0, player.hp - 1)
-                    player.steps_since_hit = 0
-                    player.just_hit = True
-                    esper.delete_entity(e)
-                elif not _blocks_movement(new_x, new_y):
+                
+                # Blocked by static environment (walls, doors, cages)
+                is_blocked = _blocks_movement(new_x, new_y)
+                if not is_blocked:
+                    # Blocked by another enemy (excluding self)
+                    for other_e, (_, other_pos) in esper.get_components(Enemy, Position):
+                        if other_e != e and other_pos.x == new_x and other_pos.y == new_y:
+                            is_blocked = True
+                            break
+                            
+                if not is_blocked:
                     pos.x, pos.y = new_x, new_y

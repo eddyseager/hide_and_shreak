@@ -49,7 +49,7 @@ def create_enemy(x: int, y: int) -> None:
     # Pick random enemy sprite from row 3 (0-15) or row 4 (0-12)
     enemy_sprites = [(c, 3) for c in range(16)] + [(c, 4) for c in range(13)]
     col, row = Random().choice(enemy_sprites)
-    esper.create_entity(PlayerMover(), Blocks_Movement(), Map_Object(), Enemy(), Position(x, y), Graphic('&', (255, 0, 0), sheet="creatures", col=col, row=row))
+    esper.create_entity(PlayerMover(), Map_Object(), Enemy(), Position(x, y), Graphic('&', (255, 0, 0), sheet="creatures", col=col, row=row))
 
 def create_spawn_point(x: int, y: int) -> None:
     esper.create_entity(Blocks_Movement(), Map_Object(), SpawnPoint(), Position(x, y), get_graphic_for_char('§'))

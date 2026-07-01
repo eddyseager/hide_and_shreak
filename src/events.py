@@ -42,12 +42,13 @@ def on_event(event: pygame.event.Event) -> None:
 
 def _move_player(dx: int, dy: int) -> None:
     _, (player, pos) = esper.get_components(Player, Position)[0]
+    
     if move_map(dx, dy, pos):
         # Successful step: increment general turn counter
         e, counter = esper.get_component(Counter)[0]
         counter.val += 1
 
-        # Healing logic: heals 1 HP every 20 steps if damaged (and not dead)
+        # Healing logic: heals 1 HP every HEAL_STEPS steps if damaged (and not dead)
         if player.hp < player.max_hp and player.hp > 0:
             player.steps_since_hit += 1
             if player.steps_since_hit >= HEAL_STEPS:
