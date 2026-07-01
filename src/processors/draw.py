@@ -26,8 +26,8 @@ class Draw(esper.Processor):
         self.shake_duration = 600    # Duration of shake in milliseconds
         self.shake_intensity = 80   # Max pixel amplitude of shake
 
-    def get_vignette(self, w, h, hp):
-        key = (w, h, hp)
+    def get_vignette(self, w, h, hp, player_screen_x, player_screen_y):
+        key = (w, h, hp, player_screen_x, player_screen_y)
         if key in self.sprite_cache:
             return self.sprite_cache[key]
 
@@ -49,8 +49,16 @@ class Draw(esper.Processor):
             vignette_color = (255, 0, 0)     # 3 hits taken (Dead): Solid red base
             vignette_low.fill((255, 0, 0, 180)) # Fill screen with transparent red on game over
             
-        cx, cy = low_w // 2, low_h // 2
-        max_factor = 1.414  # Covers corners of the rectangle
+        # Center the spotlight on the player's screen tile position (scaled down for low-res surface)
+        px_ratio = (player_screen_x * self.tile_size + self.tile_size // 2) / w
+        py_ratio = (player_screen_y * self.tile_size + self.tile_size // 2) / h
+        cx = int(low_w * px_ratio)
+        cy = int(low_h * py_ratio)
+        
+        # Calculate dynamic max_factor to ensure vignette covers the farthest corner when spotlight moves
+        x_offset_ratio = abs(px_ratio - 0.5) / 0.5
+        y_offset_ratio = abs(py_ratio - 0.5) / 0.5
+        max_factor = 1.414 * (1.0 + max(x_offset_ratio, y_offset_ratio))
         
         # Draw 100 concentric ellipses for an extremely smooth, glitch-free gradient
         for step in range(100, 0, -1):
@@ -67,7 +75,10 @@ class Draw(esper.Processor):
                 # Dense red shadow closing in fully
                 alpha = int(255 * (norm_factor ** 0.45))
             else:
-                alpha = int(250 * (norm_factor ** 0.65))  # Tight spotlight
+                # Scale up norm_factor so it reaches maximum darkness (250) closer to the center,
+                # shrinking the light pool radius by ~20% (balanced middle ground) while preserving the soft exponent curve.
+                clamped_factor = min(1.0, norm_factor * 1.25)
+                alpha = int(250 * (clamped_factor ** 0.65))
             alpha = max(0, min(alpha, 250))
             
             if alpha > 0:
@@ -163,6 +174,10 @@ class Draw(esper.Processor):
 
         # Draw map & entities
         for ent, (pos, graphic) in esper.get_components(Position, Graphic):
+            # Skip player since they are drawn last explicitly
+            if esper.has_component(ent, Player):
+                continue
+                
             # Determine visual positions (interpolated if animating)
             visual_x = pos.x
             visual_y = pos.y
@@ -217,8 +232,14 @@ class Draw(esper.Processor):
         player_rect = pygame.Rect(player_screen_x * self.tile_size + shake_x, player_screen_y * self.tile_size + player_hop_y, self.tile_size, self.tile_size)
         self.screen.blit(player_sprite, player_rect)
 
-        # Draw smooth radial vignette overlay centered on the viewport based on health state
-        vignette = self.get_vignette(self.view_width * self.tile_size, self.view_height * self.tile_size, player.hp)
+        # Draw smooth radial vignette overlay centered on the player's screen position based on health state
+        vignette = self.get_vignette(
+            self.view_width * self.tile_size, 
+            self.view_height * self.tile_size, 
+            player.hp,
+            int(player_screen_x),
+            int(player_screen_y)
+        )
         self.screen.blit(vignette, (0, 0))
 
         # Render Game Over text if player health is 0
