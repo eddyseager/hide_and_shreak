@@ -46,8 +46,9 @@ class Move_Enemy(esper.Processor):
             if path_list:
                 new_x, new_y = path_list[0]
                 if new_x == player_pos.x and new_y == player_pos.y:
-                    # Enemy hits player: deal damage and remove enemy
+                    # Enemy hits player: deal damage, reset healing steps, and remove enemy
                     player.hp = max(0, player.hp - 1)
+                    player.steps_since_hit = 0
                     esper.delete_entity(e)
                 elif not _blocks_movement(new_x, new_y):
                     pos.x, pos.y = new_x, new_y

@@ -41,11 +41,20 @@ def on_event(event: pygame.event.Event) -> None:
             pygame.event.post(pygame.event.Event(TOGGLE_DISPLAY_EVENT))
 
 def _move_player(dx: int, dy: int) -> None:
-    _, (_, pos) = esper.get_components(Player, Position)[0]
-    move_map(dx, dy, pos)
+    _, (player, pos) = esper.get_components(Player, Position)[0]
+    if move_map(dx, dy, pos):
+        # Successful step: increment general turn counter
+        e, counter = esper.get_component(Counter)[0]
+        counter.val += 1
 
-    e, counter = esper.get_component(Counter)[0]
-    counter.val += 1
+        # Healing logic: heals 1 HP every 20 steps if damaged (and not dead)
+        if player.hp < player.max_hp and player.hp > 0:
+            player.steps_since_hit += 1
+            if player.steps_since_hit >= 20:
+                player.hp = min(player.max_hp, player.hp + 1)
+                player.steps_since_hit = 0
+        else:
+            player.steps_since_hit = 0
 
 def _change_level_down() -> None:
     #there might not be any stairs down
