@@ -3,7 +3,7 @@ import pygame
 from move import move_map
 from components import *
 from entities import create_level, remove_level, load_level, create_player
-from constants import TOGGLE_DISPLAY_EVENT
+from constants import TOGGLE_DISPLAY_EVENT, HEAL_STEPS
 
 def on_event(event: pygame.event.Event) -> None:
     if event.type == pygame.KEYDOWN:
@@ -50,7 +50,7 @@ def _move_player(dx: int, dy: int) -> None:
         # Healing logic: heals 1 HP every 20 steps if damaged (and not dead)
         if player.hp < player.max_hp and player.hp > 0:
             player.steps_since_hit += 1
-            if player.steps_since_hit >= 20:
+            if player.steps_since_hit >= HEAL_STEPS:
                 player.hp = min(player.max_hp, player.hp + 1)
                 player.steps_since_hit = 0
         else:

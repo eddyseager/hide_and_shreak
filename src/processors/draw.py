@@ -21,6 +21,11 @@ class Draw(esper.Processor):
         self.sprite_cache = {}
         self.vignette_surf = None
 
+        # Screen shake configurations
+        self.shake_trigger_time = 0
+        self.shake_duration = 600    # Duration of shake in milliseconds
+        self.shake_intensity = 80   # Max pixel amplitude of shake
+
     def get_vignette(self, w, h, hp):
         key = (w, h, hp)
         if key in self.sprite_cache:
@@ -106,6 +111,20 @@ class Draw(esper.Processor):
         assert player_query, "Active player entity not found in ECS world!"
         _, (player, player_pos, player_graphic, player_level) = player_query[0]
 
+        # Trigger screen shake if player was hit this frame (even if they healed on the same turn)
+        if player.just_hit:
+            self.shake_trigger_time = pygame.time.get_ticks()
+            player.just_hit = False
+
+        # Calculate active screen shake offset
+        shake_x = 0
+        time_since_hit = pygame.time.get_ticks() - self.shake_trigger_time
+        if time_since_hit < self.shake_duration:
+            progress = time_since_hit / self.shake_duration
+            decay = 1.0 - progress
+            # Fast horizontal vibration frequency
+            shake_x = int(math.sin(time_since_hit * 0.08) * self.shake_intensity * decay)
+
         # Get active FOV for the player's current level
         active_fov = None
         for _, (fov, level) in esper.get_components(FOV, Level):
@@ -147,7 +166,7 @@ class Draw(esper.Processor):
                 color = (int(color[0] * 0.4), int(color[1] * 0.4), int(color[2] * 0.4))
 
             sprite = self.get_sprite(graphic.sheet, graphic.col, graphic.row, color)
-            rect = pygame.Rect(screen_x * self.tile_size, screen_y * self.tile_size, self.tile_size, self.tile_size)
+            rect = pygame.Rect(screen_x * self.tile_size + shake_x, screen_y * self.tile_size, self.tile_size, self.tile_size)
             self.screen.blit(sprite, rect)
 
         # Draw player last
@@ -155,7 +174,7 @@ class Draw(esper.Processor):
         player_screen_y = player_pos.y - camera_y
         player_color = player_graphic.fg
         player_sprite = self.get_sprite(player_graphic.sheet, player_graphic.col, player_graphic.row, player_color)
-        player_rect = pygame.Rect(player_screen_x * self.tile_size, player_screen_y * self.tile_size, self.tile_size, self.tile_size)
+        player_rect = pygame.Rect(player_screen_x * self.tile_size + shake_x, player_screen_y * self.tile_size, self.tile_size, self.tile_size)
         self.screen.blit(player_sprite, player_rect)
 
         # Draw smooth radial vignette overlay centered on the viewport based on health state
