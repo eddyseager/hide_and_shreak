@@ -19,3 +19,17 @@ def _blocks_movement(x: int, y: int):
         if pos.x == x and pos.y == y:
             return True
     return False
+
+def check_and_open_door(x: int, y: int) -> None:
+    for e, (door, pos, graphic) in esper.get_components(Door, Position, Graphic):
+        if pos.x == x and pos.y == y and not door.is_open:
+            door.is_open = True
+            graphic.col = 5  # Open door column (c5 r0)
+
+            # Mark the door tile as transparent for the active level FOV
+            player_query = esper.get_components(Player, Level)
+            if player_query:
+                _, (_, player_level) = player_query[0]
+                for _, (fov, l) in esper.get_components(FOV, Level):
+                    if l.val == player_level.val:
+                        fov.transparent[x, y] = True

@@ -1,6 +1,6 @@
 import esper
 import pygame
-from move import move_map
+from move import move_map, check_and_open_door
 from components import *
 from entities import create_level, remove_level, load_level, create_player
 from constants import TOGGLE_DISPLAY_EVENT, HEAL_STEPS
@@ -44,6 +44,9 @@ def _move_player(dx: int, dy: int) -> None:
     _, (player, pos) = esper.get_components(Player, Position)[0]
     
     if move_map(dx, dy, pos):
+        # Open door if player stepped on one
+        check_and_open_door(pos.x, pos.y)
+        
         # Successful step: increment general turn counter
         e, counter = esper.get_component(Counter)[0]
         counter.val += 1

@@ -54,8 +54,13 @@ def create_enemy(x: int, y: int) -> None:
 def create_spawn_point(x: int, y: int) -> None:
     esper.create_entity(Blocks_Movement(), Map_Object(), SpawnPoint(), Position(x, y), get_graphic_for_char('§'))
 
-def create_door(x: int, y: int) -> None:
-    esper.create_entity(Map_Object(), Position(x, y), get_graphic_for_char('+'))
+def create_door(x: int, y: int, level: int) -> None:
+    esper.create_entity(Map_Object(), Door(is_open=False), Position(x, y), get_graphic_for_char('+'))
+    
+    # Closed doors are opaque initially
+    for _, (fov, l) in esper.get_components(FOV, Level):
+        if l.val == level:
+            fov.transparent[x, y] = False
 
 def create_stairs_down(x: int, y: int) -> None:
     esper.create_entity(Map_Object(), StairsDown(), Position(x, y), get_graphic_for_char('>'))
@@ -88,7 +93,6 @@ def remove_level() -> None:
 BUILDER_MAP = {
     '<': create_stairs_up,
     '>': create_stairs_down,
-    '+': create_door,
     '§': create_spawn_point,
     '.': lambda x, y: create_floor(x, y, '.'),
     ',': lambda x, y: create_floor(x, y, ','),
@@ -98,7 +102,9 @@ def load_level(level: int) -> None:
     with open(f'levels{os.sep}{level}.level', encoding="utf-8") as file:
         for y, line in enumerate(file):
             for x, c in enumerate(line.rstrip("\r\n")):
-                if c in BUILDER_MAP:
+                if c == '+':
+                    create_door(x, y, level)
+                elif c in BUILDER_MAP:
                     BUILDER_MAP[c](x, y)
                 elif ord(c) & 0xFF00 == 0x2500:
                     create_wall(x, y, c, level)

@@ -2,7 +2,7 @@ import esper
 import tcod.path
 import numpy as np
 from components import *
-from move import _blocks_movement
+from move import _blocks_movement, check_and_open_door
 
 class Move_Enemy(esper.Processor):
 
@@ -56,3 +56,4 @@ class Move_Enemy(esper.Processor):
                             
                 if not is_blocked:
                     pos.x, pos.y = new_x, new_y
+                    check_and_open_door(new_x, new_y)

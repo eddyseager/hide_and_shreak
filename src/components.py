@@ -20,6 +20,10 @@ class Player:
 class Wall:
     pass
 
+@component
+class Door:
+    is_open: bool = False
+
 class Floor:
     pass
 
