@@ -42,25 +42,36 @@ def get_graphic_for_char(g: str) -> Graphic:
         sheet, col, row, color = ('general', 1, 0, (110, 110, 110))
     return Graphic(g=g, fg=color, sheet=sheet, col=col, row=row)
 
-def create_player(x: int, y: int, level: int) -> None:
-    esper.create_entity(Map_Object(), Player(), Position(x, y), get_graphic_for_char('@'), Level(level))
+def create_player(x: int, y: int) -> None:
+    esper.create_entity(Map_Object(), Player(), Position(x, y), get_graphic_for_char('@'))
 
 def create_enemy(x: int, y: int) -> None:
     # Pick random enemy sprite from row 3 (0-15) or row 4 (0-12)
     enemy_sprites = [(c, 3) for c in range(16)] + [(c, 4) for c in range(13)]
     col, row = Random().choice(enemy_sprites)
-    esper.create_entity(PlayerMover(), Map_Object(), Enemy(), Position(x, y), Graphic('&', (255, 0, 0), sheet="creatures", col=col, row=row))
+    
+    explored = np.zeros((MAP_WIDTH, MAP_HEIGHT), dtype=bool, order="F")
+    
+    esper.create_entity(
+        PlayerMover(), 
+        Map_Object(), 
+        Enemy(), 
+        Position(x, y), 
+        Graphic('&', (255, 0, 0), sheet="creatures", col=col, row=row),
+        EnemyAI(state="explore", explored=explored)
+    )
 
-def create_spawn_point(x: int, y: int) -> None:
+def create_spawn_point(x: int, y: int, level_map: LevelMap) -> None:
     esper.create_entity(Blocks_Movement(), Map_Object(), SpawnPoint(), Position(x, y), get_graphic_for_char('§'))
+    
+    # Spawn points block movement
+    level_map.walkable[x, y] = False
 
-def create_door(x: int, y: int, level: int) -> None:
-    esper.create_entity(Map_Object(), Door(is_open=False), Position(x, y), get_graphic_for_char('+'))
+def create_door(x: int, y: int, level_map: LevelMap) -> None:
+    esper.create_entity(Blocks_FOV(), Map_Object(), Door(is_open=False), Position(x, y), get_graphic_for_char('+'))
     
     # Closed doors are opaque initially
-    for _, (fov, l) in esper.get_components(FOV, Level):
-        if l.val == level:
-            fov.transparent[x, y] = False
+    level_map.transparent[x, y] = False
 
 def create_stairs_down(x: int, y: int) -> None:
     esper.create_entity(Map_Object(), StairsDown(), Position(x, y), get_graphic_for_char('>'))
@@ -68,13 +79,12 @@ def create_stairs_down(x: int, y: int) -> None:
 def create_stairs_up(x: int, y: int) -> None:
     esper.create_entity(Map_Object(), StairsUp(), Position(x, y), get_graphic_for_char('<'))
 
-def create_wall(x: int, y: int, g: str, level: int) -> None:
-    esper.create_entity(Blocks_Movement(), Map_Object(), Wall(), Position(x, y), get_graphic_for_char(g))
+def create_wall(x: int, y: int, g: str, level_map: LevelMap) -> None:
+    esper.create_entity(Blocks_Movement(), Blocks_FOV(), Map_Object(), Wall(), Position(x, y), get_graphic_for_char(g))
 
-    # Walls are not transparent
-    for _, (fov, l) in esper.get_components(FOV, Level):
-        if l.val == level:
-            fov.transparent[x, y] = False
+    # Walls block both transparency and movement
+    level_map.transparent[x, y] = False
+    level_map.walkable[x, y] = False
 
 def create_floor(x: int, y: int, g: str) -> None:
     esper.create_entity(Floor(), Position(x, y), get_graphic_for_char(g))
@@ -93,34 +103,38 @@ def remove_level() -> None:
 BUILDER_MAP = {
     '<': create_stairs_up,
     '>': create_stairs_down,
-    '§': create_spawn_point,
     '.': lambda x, y: create_floor(x, y, '.'),
     ',': lambda x, y: create_floor(x, y, ','),
 }
 
-def load_level(level: int) -> None:
+def load_level(level: int, level_map: LevelMap) -> None:
     with open(f'levels{os.sep}{level}.level', encoding="utf-8") as file:
         for y, line in enumerate(file):
             for x, c in enumerate(line.rstrip("\r\n")):
                 if c == '+':
-                    create_door(x, y, level)
+                    create_door(x, y, level_map)
+                elif c == '§':
+                    create_spawn_point(x, y, level_map)
                 elif c in BUILDER_MAP:
                     BUILDER_MAP[c](x, y)
                 elif ord(c) & 0xFF00 == 0x2500:
-                    create_wall(x, y, c, level)
+                    create_wall(x, y, c, level_map)
 
 def create_level(level: int) -> None:
-    # Check whether entity for this level already exists
-    create_level = True
-    for e, (l, f) in esper.get_components(Level, FOV):
-        if l.val == level:
-            create_level = False
+    _, game_maps = esper.get_component(GameMaps)[0]
 
-    if create_level:
+    if level not in game_maps.levels:
         # Create numpy array of walls to track transparency and explored tiles
         trans = np.ones((MAP_WIDTH, MAP_HEIGHT), dtype=bool, order="F")
         exp = np.zeros((MAP_WIDTH, MAP_HEIGHT), dtype=bool, order="F")
         visible = np.zeros((MAP_WIDTH, MAP_HEIGHT), dtype=bool, order="F")
-        esper.create_entity(Level(level), FOV(explored=exp, transparent=trans, visible=visible))
+        walkable = np.ones((MAP_WIDTH, MAP_HEIGHT), dtype=bool, order="F")
+        level_map = LevelMap(explored=exp, transparent=trans, visible=visible, walkable=walkable, index=level)
+        game_maps.levels[level] = level_map
+    else:
+        level_map = game_maps.levels[level]
 
-    load_level(level) # TODO - don't reload level from file each time, keep in memory
+    # Set the active level reference
+    game_maps.active_level = level
+
+    load_level(level, level_map) # TODO - don't reload level from file each time, keep in memory

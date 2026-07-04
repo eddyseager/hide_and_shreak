@@ -32,9 +32,10 @@ def main() -> None:
 
     level = 0
     create_map_dimension()
+    esper.create_entity(GameMaps(levels={}))
     create_level(level)
     _, (_, stair_up) = esper.get_components(StairsUp, Position)[0]
-    create_player(stair_up.x, stair_up.y, level)
+    create_player(stair_up.x, stair_up.y)
     create_counter()
     
     esper.add_processor(Move_Enemy(), 6)

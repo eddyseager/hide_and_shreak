@@ -7,7 +7,10 @@ from constants import MAP_WIDTH, MAP_HEIGHT, SPAWN_COUNT
 class Map_Object:
     pass
 
-class Blocks_Movement:
+class Blocks_FOV:
+    pass
+
+class Blocks_Movement(Blocks_FOV):
     pass
 
 @component
@@ -33,6 +36,12 @@ class MovementAnim:
     start_time: int
     duration: int = 150
 
+@component
+class EnemyAI:
+    state: str = "explore"
+    explored: np.ndarray = None
+    fov_radius: int = 5
+
 class Floor:
     pass
 
@@ -50,10 +59,6 @@ class SpawnPoint:
 
 class PlayerMover:
     pass
-
-@component
-class Level:
-    val: int
 
 @component
 class Position:
@@ -77,10 +82,17 @@ class MapDimension:
         return x >= 0 and x < self.width and y >= 0 and y < self.height
 
 @component
-class FOV:
+class LevelMap:
     transparent: np.ndarray
     explored: np.ndarray
     visible: np.ndarray
+    walkable: np.ndarray = None
+    index: int = 0
+
+@component
+class GameMaps:
+    levels: dict[int, LevelMap]
+    active_level: int = 0
 
 @component
 class Counter:

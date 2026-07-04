@@ -118,9 +118,9 @@ class Draw(esper.Processor):
         self.screen.fill((0, 0, 0))
 
         # Get player level & details
-        player_query = esper.get_components(Player, Position, Graphic, Level)
+        player_query = esper.get_components(Player, Position, Graphic)
         assert player_query, "Active player entity not found in ECS world!"
-        player_ent, (player, player_pos, player_graphic, player_level) = player_query[0]
+        player_ent, (player, player_pos, player_graphic) = player_query[0]
 
         # Trigger screen shake if player was hit this frame (even if they healed on the same turn)
         if player.just_hit:
@@ -136,14 +136,9 @@ class Draw(esper.Processor):
             # Fast horizontal vibration frequency
             shake_x = int(math.sin(time_since_hit * 0.08) * self.shake_intensity * decay)
 
-        # Get active FOV for the player's current level
-        active_fov = None
-        for _, (fov, level) in esper.get_components(FOV, Level):
-            if level.val == player_level.val:
-                active_fov = fov
-                break
-
-        assert active_fov is not None, f"Active FOV map not found for level {player_level.val}!"
+        # Retrieve the map overlay grid for the active level
+        _, game_maps = esper.get_component(GameMaps)[0]
+        active_level_map = game_maps.levels[game_maps.active_level]
 
         # Fetch current time for animation progress
         time = pygame.time.get_ticks()
@@ -208,9 +203,9 @@ class Draw(esper.Processor):
                 continue
 
             # Check visibility at the logical tile position
-            if active_fov.visible[pos.x, pos.y]:
+            if active_level_map.visible[pos.x, pos.y]:
                 visible = True
-            elif active_fov.explored[pos.x, pos.y] and not esper.has_component(ent, Enemy):
+            elif active_level_map.explored[pos.x, pos.y] and not esper.has_component(ent, Enemy):
                 visible = False
             else:
                 continue
