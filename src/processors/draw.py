@@ -137,8 +137,7 @@ class Draw(esper.Processor):
             shake_x = int(math.sin(time_since_hit * 0.08) * self.shake_intensity * decay)
 
         # Retrieve the map overlay grid for the active level
-        _, game_maps = esper.get_component(GameMaps)[0]
-        active_level_map = game_maps.levels[game_maps.active_level]
+        _, active_level_map = esper.get_component(LevelMap)[0]
 
         # Fetch current time for animation progress
         time = pygame.time.get_ticks()

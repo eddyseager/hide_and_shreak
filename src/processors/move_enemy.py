@@ -28,8 +28,7 @@ class Move_Enemy(esper.Processor):
         if player.hp <= 0:
             return
 
-        _, game_maps = esper.get_component(GameMaps)[0]
-        active_map = game_maps.levels[game_maps.active_level]
+        _, active_map = esper.get_component(LevelMap)[0]
         walkable = active_map.walkable
         transparent = active_map.transparent
 

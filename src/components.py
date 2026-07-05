@@ -24,8 +24,12 @@ class Wall:
     pass
 
 @component
-class Door:
-    is_open: bool = False
+class ClosedDoor:
+    pass
+
+@component
+class OpenDoor:
+    pass
 
 @component
 class MovementAnim:
@@ -89,10 +93,7 @@ class LevelMap:
     walkable: np.ndarray = None
     index: int = 0
 
-@component
-class GameMaps:
-    levels: dict[int, LevelMap]
-    active_level: int = 0
+
 
 @component
 class Counter:

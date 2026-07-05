@@ -2,8 +2,10 @@ import esper
 import pygame
 from move import move_map, check_and_open_door
 from components import *
-from entities import create_level, remove_level, load_level, create_player
+from entities import create_player
+from level_setup import init_level_world
 from constants import TOGGLE_DISPLAY_EVENT, HEAL_STEPS
+from processors.draw import Draw
 
 def on_event(event: pygame.event.Event) -> None:
     if event.type == pygame.KEYDOWN:
@@ -70,34 +72,71 @@ def _move_player(dx: int, dy: int) -> None:
         else:
             player.steps_since_hit = 0
 
+def _change_level(next_level: int, spawn_on_stairs_type: type) -> None:
+    player_query = esper.get_components(Player, Position)
+    assert player_query, "Player not found before level transition!"
+    player_ent, (player_comp, player_pos) = player_query[0]
+    
+    current_hp = player_comp.hp
+    current_max_hp = player_comp.max_hp
+    current_steps = player_comp.steps_since_hit
+    current_just_hit = player_comp.just_hit
+
+    _, counter = esper.get_component(Counter)[0]
+    current_turn = counter.val
+
+    draw_proc = esper.get_processor(Draw)
+    screen = draw_proc.screen
+
+    world_name = f"level_{next_level}"
+    is_new_world = world_name not in esper.list_worlds()
+    esper.switch_world(world_name)
+
+    if is_new_world:
+        init_level_world(next_level, screen, current_turn)
+
+        _, (_, stair_pos) = esper.get_components(spawn_on_stairs_type, Position)[0]
+        create_player(stair_pos.x, stair_pos.y)
+    else:
+        _, counter = esper.get_component(Counter)[0]
+        counter.val = current_turn
+
+        _, (_, p_pos) = esper.get_components(Player, Position)[0]
+        _, (_, stair_pos) = esper.get_components(spawn_on_stairs_type, Position)[0]
+        p_pos.x, p_pos.y = stair_pos.x, stair_pos.y
+
+    # Sync player stats in the active world context
+    _, p_comp = esper.get_component(Player)[0]
+    p_comp.hp = current_hp
+    p_comp.max_hp = current_max_hp
+    p_comp.steps_since_hit = current_steps
+    p_comp.just_hit = current_just_hit
+
 def _change_level_down() -> None:
-    #there might not be any stairs down
     try:
         _, (_, stair_pos) = esper.get_components(StairsDown, Position)[0]
     except IndexError:
         return
 
-    _, game_maps = esper.get_component(GameMaps)[0]
     _, (_, player_pos) = esper.get_components(Player, Position)[0]
     if stair_pos == player_pos:
-        remove_level()
-        level = game_maps.active_level + 1
-        create_level(level)
-        _, (_, stair_up) = esper.get_components(StairsUp, Position)[0]
-        create_player(stair_up.x, stair_up.y)
+        _, level_map = esper.get_component(LevelMap)[0]
+        next_level = level_map.index + 1
+        _change_level(next_level, StairsUp)
 
 def _change_level_up() -> None:
-    _, (_, stair_pos) = esper.get_components(StairsUp, Position)[0]
-    _, game_maps = esper.get_component(GameMaps)[0]
+    try:
+        _, (_, stair_pos) = esper.get_components(StairsUp, Position)[0]
+    except IndexError:
+        return
+
     _, (_, player_pos) = esper.get_components(Player, Position)[0]
     if stair_pos == player_pos:
-        # End the game if you leave the dungeon on level 0
-        if game_maps.active_level == 0:
+        _, level_map = esper.get_component(LevelMap)[0]
+        current_level = level_map.index
+        if current_level == 0:
             print("You go home for tea and biscuits.")
             raise SystemExit
 
-        remove_level()
-        level = game_maps.active_level - 1
-        create_level(level)
-        _, (_, stair_down) = esper.get_components(StairsDown, Position)[0]
-        create_player(stair_down.x, stair_down.y)
+        next_level = current_level - 1
+        _change_level(next_level, StairsDown)

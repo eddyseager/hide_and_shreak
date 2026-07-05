@@ -68,9 +68,8 @@ def create_spawn_point(x: int, y: int, level_map: LevelMap) -> None:
     level_map.walkable[x, y] = False
 
 def create_door(x: int, y: int, level_map: LevelMap) -> None:
-    esper.create_entity(Blocks_FOV(), Map_Object(), Door(is_open=False), Position(x, y), get_graphic_for_char('+'))
-    
-    # Closed doors are opaque initially
+    # Doors are always spawned closed initially
+    esper.create_entity(Map_Object(), ClosedDoor(), Position(x, y), get_graphic_for_char('+'))
     level_map.transparent[x, y] = False
 
 def create_stairs_down(x: int, y: int) -> None:
@@ -121,20 +120,11 @@ def load_level(level: int, level_map: LevelMap) -> None:
                     create_wall(x, y, c, level_map)
 
 def create_level(level: int) -> None:
-    _, game_maps = esper.get_component(GameMaps)[0]
+    trans = np.ones((MAP_WIDTH, MAP_HEIGHT), dtype=bool, order="F")
+    exp = np.zeros((MAP_WIDTH, MAP_HEIGHT), dtype=bool, order="F")
+    visible = np.zeros((MAP_WIDTH, MAP_HEIGHT), dtype=bool, order="F")
+    walkable = np.ones((MAP_WIDTH, MAP_HEIGHT), dtype=bool, order="F")
+    level_map = LevelMap(explored=exp, transparent=trans, visible=visible, walkable=walkable, index=level)
+    esper.create_entity(level_map)
 
-    if level not in game_maps.levels:
-        # Create numpy array of walls to track transparency and explored tiles
-        trans = np.ones((MAP_WIDTH, MAP_HEIGHT), dtype=bool, order="F")
-        exp = np.zeros((MAP_WIDTH, MAP_HEIGHT), dtype=bool, order="F")
-        visible = np.zeros((MAP_WIDTH, MAP_HEIGHT), dtype=bool, order="F")
-        walkable = np.ones((MAP_WIDTH, MAP_HEIGHT), dtype=bool, order="F")
-        level_map = LevelMap(explored=exp, transparent=trans, visible=visible, walkable=walkable, index=level)
-        game_maps.levels[level] = level_map
-    else:
-        level_map = game_maps.levels[level]
-
-    # Set the active level reference
-    game_maps.active_level = level
-
-    load_level(level, level_map) # TODO - don't reload level from file each time, keep in memory
+    load_level(level, level_map)

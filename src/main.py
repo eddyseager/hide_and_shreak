@@ -6,12 +6,8 @@ import pygame
 from random import Random
 from components import *
 from events import on_event
-from entities import *
-from processors.draw import Draw
-from processors.update_fov import Update_FOV
-from processors.spawn_enemy import Spawn_Enemy
-from processors.move_enemy import Move_Enemy
-from processors.combat import Combat
+from entities import create_player
+from level_setup import init_level_world
 from constants import *
 
 def main() -> None:
@@ -31,18 +27,11 @@ def main() -> None:
     clock = pygame.time.Clock()
 
     level = 0
-    create_map_dimension()
-    esper.create_entity(GameMaps(levels={}))
-    create_level(level)
+    esper.switch_world(f"level_{level}")
+    init_level_world(level, screen, 0)
+
     _, (_, stair_up) = esper.get_components(StairsUp, Position)[0]
     create_player(stair_up.x, stair_up.y)
-    create_counter()
-    
-    esper.add_processor(Move_Enemy(), 6)
-    esper.add_processor(Update_FOV(), 5)
-    esper.add_processor(Combat(), 4)
-    esper.add_processor(Spawn_Enemy(), 3)
-    esper.add_processor(Draw(screen, TILE_SIZE, VIEW_WIDTH, VIEW_HEIGHT), 1)
 
     running = True
     while running:
