@@ -14,21 +14,19 @@ class Move_Enemy(esper.Processor):
         self.last_processed_turn = 0
 
     def process(self):
-        _, counter = esper.get_component(Counter)[0]
+        counter = get_singleton(Counter)
         #We only move on even turns
         if counter.val == self.last_processed_turn or counter.val % 2 != 0:
             return
         self.last_processed_turn = counter.val
 
-        player_query = esper.get_components(Player, Position)
-        assert player_query, "Active player entity not found in ECS world during enemy movement phase!"
-        _, (player, player_pos) = player_query[0]
+        _, (player, player_pos) = get_singleton_by_components(Player, Position)
 
         # Stop enemy AI if the player is dead
         if player.hp <= 0:
             return
 
-        _, active_map = esper.get_component(LevelMap)[0]
+        active_map = get_singleton(LevelMap)
         walkable = active_map.walkable
         transparent = active_map.transparent
 

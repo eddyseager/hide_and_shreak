@@ -118,9 +118,7 @@ class Draw(esper.Processor):
         self.screen.fill((0, 0, 0))
 
         # Get player level & details
-        player_query = esper.get_components(Player, Position, Graphic)
-        assert player_query, "Active player entity not found in ECS world!"
-        player_ent, (player, player_pos, player_graphic) = player_query[0]
+        player_ent, (player, player_pos, player_graphic) = get_singleton_by_components(Player, Position, Graphic)
 
         # Trigger screen shake if player was hit this frame (even if they healed on the same turn)
         if player.just_hit:
@@ -137,7 +135,7 @@ class Draw(esper.Processor):
             shake_x = int(math.sin(time_since_hit * 0.08) * self.shake_intensity * decay)
 
         # Retrieve the map overlay grid for the active level
-        _, active_level_map = esper.get_component(LevelMap)[0]
+        active_level_map = get_singleton(LevelMap)
 
         # Fetch current time for animation progress
         time = pygame.time.get_ticks()

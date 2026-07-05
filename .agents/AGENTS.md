@@ -1,0 +1,2 @@
+# ECS Assertion Guidelines
+- **Enforce Key Singletons**: When querying critical singleton entities (such as `Player`, `Counter`, `LevelMap`, or `MapDimension`) inside ECS processors or event handlers, always use the helper functions `get_singleton`, `get_singleton_entity`, or `get_singleton_by_components` rather than querying `esper` directly. These helpers internally assert the presence of the component, ensuring the game fails fast if a singleton is missing.

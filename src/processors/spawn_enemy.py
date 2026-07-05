@@ -11,7 +11,7 @@ class Spawn_Enemy(esper.Processor):
         self.last_processed_turn = 0
 
     def process(self):
-        e, counter = esper.get_component(Counter)[0]
+        counter = get_singleton(Counter)
         if counter.val == self.last_processed_turn:
             return
         self.last_processed_turn = counter.val

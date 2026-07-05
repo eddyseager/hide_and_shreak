@@ -1,5 +1,6 @@
 from dataclasses import dataclass as component
 import numpy as np
+import esper
 from constants import MAP_WIDTH, MAP_HEIGHT, SPAWN_COUNT
 
 
@@ -98,3 +99,18 @@ class LevelMap:
 @component
 class Counter:
     val: int
+
+def get_singleton(comp_type):
+    query = esper.get_component(comp_type)
+    assert query, f"Required singleton {comp_type.__name__} not found in ECS world!"
+    return query[0][1]
+
+def get_singleton_entity(comp_type):
+    query = esper.get_component(comp_type)
+    assert query, f"Required singleton {comp_type.__name__} not found in ECS world!"
+    return query[0]
+
+def get_singleton_by_components(*comp_types):
+    query = esper.get_components(*comp_types)
+    assert query, f"Required singleton with components {[c.__name__ for c in comp_types]} not found in ECS world!"
+    return query[0]

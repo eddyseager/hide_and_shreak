@@ -4,7 +4,7 @@ import numpy as np
 from components import *
 
 def move_map(dx: int, dy: int, pos: Position) -> bool:
-    _, dim = esper.get_component(MapDimension)[0]
+    dim = get_singleton(MapDimension)
     x = pos.x + dx
     y = pos.y + dy
 
@@ -15,7 +15,7 @@ def move_map(dx: int, dy: int, pos: Position) -> bool:
     return False
 
 def blocks_movement(x: int, y: int):
-    _, level_map = esper.get_component(LevelMap)[0]
+    level_map = get_singleton(LevelMap)
     return not level_map.walkable[x, y]
 
 def check_and_open_door(x: int, y: int) -> None:
@@ -27,5 +27,5 @@ def check_and_open_door(x: int, y: int) -> None:
             graphic.col = 5  # Open door column (c5 r0)
 
             # Mark the door tile as transparent for the active level FOV
-            _, level_map = esper.get_component(LevelMap)[0]
+            level_map = get_singleton(LevelMap)
             level_map.transparent[x, y] = True
