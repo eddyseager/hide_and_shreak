@@ -1,4 +1,5 @@
 import math
+import random
 import esper
 import pygame
 from components import *
@@ -39,15 +40,13 @@ class Draw(esper.Processor):
         vignette_low.fill((0, 0, 0, 0))
         
         # Determine vignette color based on player hp
-        if hp == 3:
-            vignette_color = (0, 0, 0)       # Normal: Black
-        elif hp == 2:
-            vignette_color = (130, 0, 0)     # 1 hit taken: Dark red
-        elif hp == 1:
-            vignette_color = (255, 0, 0)     # 2 hits taken: Bright red
-        else:
-            vignette_color = (255, 0, 0)     # 3 hits taken (Dead): Solid red base
+        if hp == 1:
+            vignette_color = (120, 0, 0)       # Critical low health: Darker Crimson
+        elif hp <= 0:
+            vignette_color = (255, 0, 0)       # Dead: Bright Red
             vignette_low.fill((255, 0, 0, 180)) # Fill screen with transparent red on game over
+        else:
+            vignette_color = (0, 0, 0)         # Healthy (2+ HP): Black
             
         # Center the spotlight on the player's screen tile position (scaled down for low-res surface)
         px_ratio = (player_screen_x * self.tile_size + self.tile_size // 2) / w
@@ -74,12 +73,17 @@ class Draw(esper.Processor):
             if hp == 0:
                 # Dense red shadow closing in fully
                 alpha = int(255 * (norm_factor ** 0.45))
+                alpha = max(0, min(alpha, 255))
+            elif hp == 1:
+                # Soft translucent crimson shadow around edges
+                clamped_factor = min(1.0, norm_factor * 1.25)
+                alpha = int(140 * (clamped_factor ** 0.65))
+                alpha = max(0, min(alpha, 140))
             else:
-                # Scale up norm_factor so it reaches maximum darkness (250) closer to the center,
-                # shrinking the light pool radius by ~20% (balanced middle ground) while preserving the soft exponent curve.
+                # Standard black shadow around edges
                 clamped_factor = min(1.0, norm_factor * 1.25)
                 alpha = int(250 * (clamped_factor ** 0.65))
-            alpha = max(0, min(alpha, 250))
+                alpha = max(0, min(alpha, 250))
             
             if alpha > 0:
                 rect = pygame.Rect(rx, ry, ellipse_w, ellipse_h)
@@ -165,11 +169,20 @@ class Draw(esper.Processor):
         camera_y = max(0, min(camera_y, MAP_HEIGHT - self.view_height))
 
         # Draw map & entities
+        # Categorize renderables into layers so environment/blood sits below creatures
+        static_renderables = []
+        creature_renderables = []
+        
         for ent, (pos, graphic) in esper.get_components(Position, Graphic):
-            # Skip player since they are drawn last explicitly
             if esper.has_component(ent, Player):
                 continue
-                
+            if esper.has_component(ent, Enemy):
+                creature_renderables.append((ent, pos, graphic))
+            else:
+                static_renderables.append((ent, pos, graphic))
+
+        # Render static layers first, then active creatures
+        for ent, pos, graphic in (static_renderables + creature_renderables):
             # Determine visual positions (interpolated if animating)
             visual_x = pos.x
             visual_y = pos.y
@@ -207,13 +220,52 @@ class Draw(esper.Processor):
             else:
                 continue
 
+            rect = pygame.Rect(screen_x * self.tile_size + shake_x, screen_y * self.tile_size + hop_y, self.tile_size, self.tile_size)
+
+            # Custom rendering for procedural circle blood splatters
+            if esper.has_component(ent, Blood):
+                blood = esper.component_for_entity(ent, Blood)
+                rng = random.Random(blood.seed)
+                
+                # Base blood color (dark red)
+                base_color = (150, 10, 10)
+                if not visible:
+                    # Apply 40% tint for fog of war
+                    base_color = (60, 4, 4)
+
+                cx = rect.x + self.tile_size // 2
+                cy = rect.y + self.tile_size // 2
+
+                # Determine sizes based on intensity level
+                if blood.intensity == 1:
+                    main_r = rng.randint(4, 5)
+                    num_drops = rng.randint(3, 4)
+                else:
+                    main_r = rng.randint(6, 8)
+                    num_drops = rng.randint(5, 7)
+
+                # Draw main center splatter
+                pygame.draw.circle(self.screen, base_color, (cx + rng.randint(-2, 2), cy + rng.randint(-2, 2)), main_r)
+
+                # Draw satellite droplets
+                for _ in range(num_drops):
+                    off_x = rng.randint(-self.tile_size // 3, self.tile_size // 3)
+                    off_y = rng.randint(-self.tile_size // 3, self.tile_size // 3)
+                    drop_r = rng.randint(1, 2)
+                    drop_color = (
+                        max(0, min(255, base_color[0] + rng.randint(-15, 15))),
+                        max(0, min(255, base_color[1] + rng.randint(-2, 2))),
+                        max(0, min(255, base_color[2] + rng.randint(-2, 2)))
+                    )
+                    pygame.draw.circle(self.screen, drop_color, (cx + off_x, cy + off_y), drop_r)
+                continue
+
             # Render the pre-configured sprite details directly
             color = graphic.fg
             if not visible:
                 color = (int(color[0] * 0.4), int(color[1] * 0.4), int(color[2] * 0.4))
 
             sprite = self.get_sprite(graphic.sheet, graphic.col, graphic.row, color)
-            rect = pygame.Rect(screen_x * self.tile_size + shake_x, screen_y * self.tile_size + hop_y, self.tile_size, self.tile_size)
             self.screen.blit(sprite, rect)
 
         # Draw player last at visual coordinates

@@ -1,5 +1,6 @@
 import esper
 import pygame
+import random
 from move import move_map, check_and_open_door
 from components import *
 from entities import create_player
@@ -44,10 +45,25 @@ def on_event(event: pygame.event.Event) -> None:
 
 def _move_player(dx: int, dy: int) -> None:
     player_ent, (player, pos) = get_singleton_by_components(Player, Position)
+    old_x, old_y = pos.x, pos.y
     
     if move_map(dx, dy, pos):
         # Open door if player stepped on one
         check_and_open_door(pos.x, pos.y)
+        
+        # Drop blood on the previous tile if player is injured
+        if player.hp < player.max_hp:
+            hp_lost = player.max_hp - player.hp
+            intensity = 1 if hp_lost == 1 else 2
+                
+            blood_graphic = Graphic(g=' ', fg=(150, 10, 10))
+            seed = random.randint(0, 1000000)
+            
+            esper.create_entity(
+                Blood(intensity=intensity, seed=seed),
+                Position(x=old_x, y=old_y),
+                blood_graphic
+            )
         
         # Attach movement animation component to the player
         esper.add_component(player_ent, MovementAnim(

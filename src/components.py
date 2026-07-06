@@ -94,11 +94,14 @@ class LevelMap:
     walkable: np.ndarray = None
     index: int = 0
 
-
-
 @component
 class Counter:
     val: int
+
+@component
+class Blood:
+    intensity: int = 1
+    seed: int = 0
 
 def get_singleton(comp_type):
     query = esper.get_component(comp_type)
