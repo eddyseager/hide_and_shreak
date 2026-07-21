@@ -16,6 +16,7 @@ def main() -> None:
     pygame.mixer.pre_init(44100, -16, 2, 512)
     pygame.init()
     pygame.mixer.init()
+    pygame.key.set_repeat(250, 130)
 
     # Play title music initially
     pygame.mixer.music.load("music/title.mp3")

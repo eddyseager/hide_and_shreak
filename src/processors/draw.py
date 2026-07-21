@@ -55,9 +55,10 @@ class Draw(esper.Processor):
             if t >= 1.0:
                 removals.append((player_ent, MovementAnim))
             else:
-                player_visual_x = anim.start_x + (anim.target_x - anim.start_x) * t
-                player_visual_y = anim.start_y + (anim.target_y - anim.start_y) * t
-                player_hop_y = -int(math.sin(t * math.pi) * (self.tile_size // 4))
+                t_eased = math.sin(t * math.pi / 2)
+                player_visual_x = anim.start_x + (anim.target_x - anim.start_x) * t_eased
+                player_visual_y = anim.start_y + (anim.target_y - anim.start_y) * t_eased
+                player_hop_y = -int(math.sin(t * math.pi) * 7)
 
         # Calculate camera offset to center on player's visual path
         camera_x, camera_y = self.camera.get_camera_offset(player_visual_x, player_visual_y)
@@ -86,12 +87,10 @@ class Draw(esper.Processor):
                 if t >= 1.0:
                     removals.append((ent, MovementAnim))
                 else:
-                    visual_x = anim.start_x + (anim.target_x - anim.start_x) * t
-                    visual_y = anim.start_y + (anim.target_y - anim.start_y) * t
-                    if not esper.has_component(ent, Enemy):
-                        hop_y = -int(math.sin(t * math.pi) * (self.tile_size // 4))
-                    else:
-                        hop_y = -int(math.sin(t * math.pi) * (self.tile_size // 8))
+                    t_eased = math.sin(t * math.pi / 2)
+                    visual_x = anim.start_x + (anim.target_x - anim.start_x) * t_eased
+                    visual_y = anim.start_y + (anim.target_y - anim.start_y) * t_eased
+                    hop_y = -int(math.sin(t * math.pi) * 5)
 
             screen_x = visual_x - camera_x
             screen_y = visual_y - camera_y

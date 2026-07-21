@@ -42,7 +42,7 @@ class MovementAnim:
     target_x: int
     target_y: int
     start_time: int
-    duration: int = 150
+    duration: int = 120
 
 @component
 class EnemyAI:
