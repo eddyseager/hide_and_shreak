@@ -111,3 +111,45 @@ def _change_level(next_level: int, spawn_on_stairs_type: type) -> None:
     p_comp.max_hp = current_max_hp
     p_comp.steps_since_hit = current_steps
     p_comp.just_hit = current_just_hit
+
+def restart_game() -> None:
+    # Convert current dead player into a Corpse component
+    try:
+        player_ent, (player_comp, player_pos) = get_singleton_by_components(Player, Position)
+        esper.remove_component(player_ent, Player)
+        esper.add_component(player_ent, Corpse())
+    except (AssertionError, IndexError):
+        pass
+
+    # Reset LevelMap visibility & fog of war
+    level_map = get_singleton(LevelMap)
+    level_map.visible.fill(False)
+    level_map.explored.fill(False)
+
+    # Reset turn counter
+    counter = get_singleton(Counter)
+    counter.val = 0
+
+    # Remove active enemies
+    for enemy_ent, _ in esper.get_component(Enemy):
+        esper.delete_entity(enemy_ent, True)
+
+    # Reset spawn point cages
+    for ent, (_, graphic) in esper.get_components(SpawnPoint, Graphic):
+        graphic.col = 30
+
+    # Reset Spawn_Enemy processor turn state if present
+    from processors.spawn_enemy import Spawn_Enemy
+    try:
+        spawn_proc = esper.get_processor(Spawn_Enemy)
+        if spawn_proc:
+            spawn_proc.last_processed_turn = 0
+    except KeyError:
+        pass
+
+    # Create a new Player at StairsUp
+    try:
+        _, (_, stair_up) = esper.get_components(StairsUp, Position)[0]
+        create_player(stair_up.x, stair_up.y)
+    except (IndexError, AssertionError):
+        create_player(1, 1)

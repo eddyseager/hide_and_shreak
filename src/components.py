@@ -24,6 +24,9 @@ class Player:
 class Wall:
     pass
 
+class Corpse:
+    pass
+
 @component
 class ClosedDoor:
     pass

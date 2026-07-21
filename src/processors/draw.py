@@ -121,6 +121,16 @@ class Draw(esper.Processor):
                 self.blood_renderer.render(blood, rect, visible)
                 continue
 
+            # Render corpse rotated 90 degrees clockwise
+            if esper.has_component(ent, Corpse):
+                color = graphic.fg
+                if not visible:
+                    color = (int(color[0] * 0.4), int(color[1] * 0.4), int(color[2] * 0.4))
+                sprite = self.get_sprite(graphic.sheet, graphic.col, graphic.row, color)
+                sprite = pygame.transform.rotate(sprite, -90)
+                self.screen.blit(sprite, rect)
+                continue
+
             # Render pre-configured sprite
             color = graphic.fg
             if not visible:
@@ -134,6 +144,8 @@ class Draw(esper.Processor):
         player_screen_y = player_visual_y - camera_y
         player_color = player_graphic.fg
         player_sprite = self.get_sprite(player_graphic.sheet, player_graphic.col, player_graphic.row, player_color)
+        if player.hp <= 0:
+            player_sprite = pygame.transform.rotate(player_sprite, -90)
         player_rect = pygame.Rect(
             player_screen_x * self.tile_size + shake_x,
             player_screen_y * self.tile_size + player_hop_y,

@@ -14,7 +14,9 @@ def on_event(event: pygame.event.Event) -> None:
             is_dead = False
 
         if is_dead:
-            if event.key == pygame.K_ESCAPE:
+            if event.key == pygame.K_r:
+                player_events.restart_game()
+            elif event.key == pygame.K_ESCAPE:
                 raise SystemExit
             return
 
