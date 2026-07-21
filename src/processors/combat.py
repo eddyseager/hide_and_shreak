@@ -6,12 +6,12 @@ class Combat(esper.Processor):
     def __init__(self):
         super().__init__()
         try:
-            self.hit_sound = pygame.mixer.Sound("sounds/hit.mp3")
+            self.hit_sound = pygame.mixer.Sound("sounds/explosion.wav")
         except (pygame.error, FileNotFoundError):
             self.hit_sound = None
             
         try:
-            self.die_sound = pygame.mixer.Sound("sounds/die.mp3")
+            self.die_sound = pygame.mixer.Sound("sounds/explosion2.wav")
         except (pygame.error, FileNotFoundError):
             self.die_sound = None
 
