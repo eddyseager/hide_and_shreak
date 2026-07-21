@@ -5,7 +5,7 @@ class Camera:
     def __init__(self, view_width: int, view_height: int, shake_duration: int = 600, shake_intensity: int = 80):
         self.view_width = view_width
         self.view_height = view_height
-        self.shake_trigger_time = 0
+        self.shake_trigger_time = -1
         self.shake_duration = shake_duration
         self.shake_intensity = shake_intensity
 
@@ -13,8 +13,10 @@ class Camera:
         self.shake_trigger_time = current_time
 
     def get_shake_offset(self, current_time: int) -> int:
+        if self.shake_trigger_time < 0:
+            return 0
         time_since_hit = current_time - self.shake_trigger_time
-        if time_since_hit < self.shake_duration:
+        if 0 <= time_since_hit < self.shake_duration:
             progress = time_since_hit / self.shake_duration
             decay = 1.0 - progress
             return int(math.sin(time_since_hit * 0.08) * self.shake_intensity * decay)
