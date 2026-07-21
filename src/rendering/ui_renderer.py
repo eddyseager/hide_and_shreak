@@ -1,4 +1,6 @@
 import pygame
+from rendering.title_renderer import TitleRenderer
+from rendering.game_over_renderer import GameOverRenderer
 
 class UIRenderer:
     def __init__(self, screen: pygame.Surface, view_width: int, view_height: int, tile_size: int):
@@ -12,10 +14,12 @@ class UIRenderer:
 
     def _get_fonts(self):
         if self._font_title is None:
-            # Authentic gothic / medieval font cascade (regular weight for legibility)
+            # Gothic / medieval font cascade for titles ("Hide and Shreak", "Game Over")
             gothic_fonts = ["oldenglishtext", "blackadderitc", "chiller", "goudyoldstyle", "georgia", "serif"]
+            # Clean, highly readable sans-serif font cascade for menu options and instructions
+            readable_fonts = ["segoeui", "arial", "helvetica", "sans-serif"]
             self._font_title = pygame.font.SysFont(gothic_fonts, 100)
-            self._font_sub = pygame.font.SysFont(gothic_fonts, 36)
+            self._font_sub = pygame.font.SysFont(readable_fonts, 32, bold=True)
         return self._font_title, self._font_sub
 
     def _get_backdrop(self, width: int, height: int) -> pygame.Surface:
@@ -26,41 +30,15 @@ class UIRenderer:
             self._backdrop_banner = banner
         return self._backdrop_banner
 
+    def render_title_screen(self):
+        font_title, font_sub = self._get_fonts()
+        renderer = TitleRenderer(self.screen, self.view_width, self.view_height, self.tile_size, font_title, font_sub)
+        renderer.render()
+
     def render_game_over(self):
         font_title, font_sub = self._get_fonts()
         screen_w = self.view_width * self.tile_size
         screen_h = self.view_height * self.tile_size
-        cx, cy = screen_w // 2, screen_h // 2
-
-        # 1. Render dark backdrop banner across the text area
-        banner_h = 240
-        banner_y = cy - 120
-        banner = self._get_backdrop(screen_w, banner_h)
-        self.screen.blit(banner, (0, banner_y))
-
-        # 2. Render Game Over Title in Title Case with regular font weight
-        title_str = "Game Over"
-        title_shadow = font_title.render(title_str, True, (0, 0, 0))
-        title_text = font_title.render(title_str, True, (255, 255, 255))
-
-        title_y = cy - 50
-        self.screen.blit(title_shadow, title_shadow.get_rect(center=(cx + 3, title_y + 3)))
-        self.screen.blit(title_text, title_text.get_rect(center=(cx, title_y)))
-
-        # 3. Render Restart option on its own line
-        restart_str = "Press R to Restart"
-        restart_shadow = font_sub.render(restart_str, True, (0, 0, 0))
-        restart_text = font_sub.render(restart_str, True, (255, 255, 255))
-
-        restart_y = cy + 30
-        self.screen.blit(restart_shadow, restart_shadow.get_rect(center=(cx + 2, restart_y + 2)))
-        self.screen.blit(restart_text, restart_text.get_rect(center=(cx, restart_y)))
-
-        # 4. Render Quit option on a new line below restart
-        quit_str = "Press ESC to Quit"
-        quit_shadow = font_sub.render(quit_str, True, (0, 0, 0))
-        quit_text = font_sub.render(quit_str, True, (220, 220, 220))
-
-        quit_y = cy + 75
-        self.screen.blit(quit_shadow, quit_shadow.get_rect(center=(cx + 2, quit_y + 2)))
-        self.screen.blit(quit_text, quit_text.get_rect(center=(cx, quit_y)))
+        backdrop = self._get_backdrop(screen_w, screen_h)
+        renderer = GameOverRenderer(self.screen, self.view_width, self.view_height, self.tile_size, font_title, font_sub, backdrop)
+        renderer.render()
