@@ -1,4 +1,5 @@
 import pygame
+from rendering.mist_renderer import MistRenderer
 
 class TitleRenderer:
     def __init__(self, screen: pygame.Surface, view_width: int, view_height: int, tile_size: int, font_title: pygame.font.Font, font_sub: pygame.font.Font):
@@ -8,16 +9,24 @@ class TitleRenderer:
         self.tile_size = tile_size
         self.font_title = font_title
         self.font_sub = font_sub
+        
+        screen_w = view_width * tile_size
+        screen_h = view_height * tile_size
+        self.mist_renderer = MistRenderer(screen_w, screen_h)
 
     def render(self):
         screen_w = self.view_width * self.tile_size
         screen_h = self.view_height * self.tile_size
         cx, cy = screen_w // 2, screen_h // 2
+        time = pygame.time.get_ticks()
 
-        # 1. Fill screen background with solid black
-        self.screen.fill((0, 0, 0))
+        # 1. Fill screen background with dark nocturnal void
+        self.screen.fill((5, 5, 10))
 
-        # 2. Game Title "Hide and Shreak" in gothic font
+        # 2. Render scary rolling mist animation layers
+        self.mist_renderer.render(self.screen, time)
+
+        # 3. Game Title "Hide and Shreak" in gothic font
         title_str = "Hide and Shreak"
         title_shadow = self.font_title.render(title_str, True, (0, 0, 0))
         title_text = self.font_title.render(title_str, True, (255, 255, 255))
@@ -26,7 +35,7 @@ class TitleRenderer:
         self.screen.blit(title_shadow, title_shadow.get_rect(center=(cx + 3, title_y + 3)))
         self.screen.blit(title_text, title_text.get_rect(center=(cx, title_y)))
 
-        # 3. Instructions in clean readable font
+        # 4. Instructions in clean readable font
         start_str = "Press SPACE to Play"
         start_shadow = self.font_sub.render(start_str, True, (0, 0, 0))
         start_text = self.font_sub.render(start_str, True, (255, 255, 255))
