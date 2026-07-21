@@ -12,16 +12,16 @@ class UIRenderer:
 
     def _get_fonts(self):
         if self._font_title is None:
-            # Clean, high-legibility gothic serif font cascade
-            gothic_fonts = ["copperplategothic", "georgia", "baskervilleoldface", "bookmanoldstyle", "serif"]
-            self._font_title = pygame.font.SysFont(gothic_fonts, 100, bold=True)
-            self._font_sub = pygame.font.SysFont(gothic_fonts, 36, bold=True)
+            # Authentic gothic / medieval font cascade (regular weight for legibility)
+            gothic_fonts = ["oldenglishtext", "blackadderitc", "chiller", "goudyoldstyle", "georgia", "serif"]
+            self._font_title = pygame.font.SysFont(gothic_fonts, 100)
+            self._font_sub = pygame.font.SysFont(gothic_fonts, 36)
         return self._font_title, self._font_sub
 
     def _get_backdrop(self, width: int, height: int) -> pygame.Surface:
         if self._backdrop_banner is None or self._backdrop_banner.get_size() != (width, height):
             banner = pygame.Surface((width, height), pygame.SRCALPHA)
-            # Translucent dark banner overlay to boost readability over red splash/blood
+            # Translucent dark banner overlay to guarantee 100% contrast
             banner.fill((0, 0, 0, 175))
             self._backdrop_banner = banner
         return self._backdrop_banner
@@ -38,11 +38,12 @@ class UIRenderer:
         banner = self._get_backdrop(screen_w, banner_h)
         self.screen.blit(banner, (0, banner_y))
 
-        # 2. Render GAME OVER Title (Copperplate Gothic / Georgia in crisp white with sharp black shadow)
-        title_shadow = font_title.render("GAME OVER", True, (0, 0, 0))
-        title_text = font_title.render("GAME OVER", True, (255, 255, 255))
+        # 2. Render Game Over Title in Title Case with regular font weight
+        title_str = "Game Over"
+        title_shadow = font_title.render(title_str, True, (0, 0, 0))
+        title_text = font_title.render(title_str, True, (255, 255, 255))
 
-        title_y = cy - 55
+        title_y = cy - 50
         self.screen.blit(title_shadow, title_shadow.get_rect(center=(cx + 3, title_y + 3)))
         self.screen.blit(title_text, title_text.get_rect(center=(cx, title_y)))
 
