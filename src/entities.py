@@ -7,12 +7,13 @@ from components import *
 # Mapping of character glyphs to specific tiles: (sheet, col, row, default_fg)
 CHAR_MAP = {
     '.': ('general', 1, 0, (139, 90, 43)),     # Original Brown Floor
-    ',': ('autotile', 13, 1, (115, 75, 35)),    # Alternate Floor (Autotile C:13 R:1)
+    ',': ('autotile', 13, 1, (59, 38, 18)),    # Alternate Floor (Autotile C:13 R:1)
     '<': ('general', 3, 0, (110, 110, 110)),    # Stairs Up
     '>': ('general', 2, 0, (110, 110, 110)),    # Stairs Down
     '+': ('general', 4, 0, (110, 110, 110)),    # Door
     '@': ('creatures', 0, 0, (255, 255, 255)),   # Player
     '§': ('general', 30, 0, (255, 255, 255)),   # Spawn Point
+    'S': ('general', 1, 0, (139, 90, 43)),   # Start Point (Floor tile)
 }
 
 # Mapping of wall glyphs to autotile coordinates (medium grey)
@@ -78,6 +79,9 @@ def create_stairs_down(x: int, y: int) -> None:
 def create_stairs_up(x: int, y: int) -> None:
     esper.create_entity(Map_Object(), StairsUp(), Position(x, y), get_graphic_for_char('<'))
 
+def create_start_point(x: int, y: int) -> None:
+    esper.create_entity(Map_Object(), StartPoint(), Position(x, y), get_graphic_for_char('S'))
+
 def create_wall(x: int, y: int, g: str, level_map: LevelMap) -> None:
     esper.create_entity(Blocks_Movement(), Blocks_FOV(), Map_Object(), Wall(), Position(x, y), get_graphic_for_char(g))
 
@@ -102,6 +106,7 @@ def remove_level() -> None:
 BUILDER_MAP = {
     '<': create_stairs_up,
     '>': create_stairs_down,
+    'S': create_start_point,
     '.': lambda x, y: create_floor(x, y, '.'),
     ',': lambda x, y: create_floor(x, y, ','),
 }

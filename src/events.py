@@ -1,11 +1,18 @@
 import esper
 import pygame
 from constants import TOGGLE_DISPLAY_EVENT
-from components import Player
+from components import Player, StoryOverlay
 import player_events
 
 def on_event(event: pygame.event.Event) -> None:
     if event.type == pygame.KEYDOWN:
+        # Check if story overlay is active
+        story_query = esper.get_component(StoryOverlay)
+        if story_query:
+            for story_ent, _ in story_query:
+                esper.delete_entity(story_ent, True)
+            return
+
         # Check player health for Game Over
         try:
             _, player = esper.get_component(Player)[0]

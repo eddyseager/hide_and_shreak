@@ -56,8 +56,8 @@ def main() -> None:
                             esper.switch_world(f"level_{level}")
                             init_level_world(level, screen, 0)
 
-                            _, (_, stair_up) = esper.get_components(StairsUp, Position)[0]
-                            create_player(stair_up.x, stair_up.y)
+                            _, (_, start_pos) = esper.get_components(StartPoint, Position)[0]
+                            create_player(start_pos.x, start_pos.y)
                             game_initialized = True
                     elif event.key == pygame.K_ESCAPE:
                         running = False

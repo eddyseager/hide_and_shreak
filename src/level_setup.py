@@ -1,6 +1,6 @@
 import esper
 import pygame
-from components import Counter
+from components import Counter, StoryOverlay
 from constants import TILE_SIZE, VIEW_WIDTH, VIEW_HEIGHT
 from entities import create_map_dimension, create_level
 from processors.move_enemy import Move_Enemy
@@ -22,3 +22,6 @@ def init_level_world(level: int, screen: pygame.Surface, turn_counter_val: int =
     create_map_dimension()
     esper.create_entity(Counter(turn_counter_val))
     create_level(level)
+
+    if level == 0:
+        esper.create_entity(StoryOverlay())

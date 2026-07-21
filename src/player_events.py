@@ -44,20 +44,7 @@ def move_player(dx: int, dy: int) -> None:
 def change_level_down() -> None:
     try:
         _, (_, stair_pos) = esper.get_components(StairsDown, Position)[0]
-    except IndexError:
-        return
-
-    _, (_, player_pos) = get_singleton_by_components(Player, Position)
-
-    if stair_pos == player_pos:
-        level_map = get_singleton(LevelMap)
-        next_level = level_map.index + 1
-        _change_level(next_level, StairsUp)
-
-def change_level_up() -> None:
-    try:
-        _, (_, stair_pos) = esper.get_components(StairsUp, Position)[0]
-    except IndexError:
+    except (IndexError, KeyError):
         return
 
     _, (_, player_pos) = get_singleton_by_components(Player, Position)
@@ -66,10 +53,21 @@ def change_level_up() -> None:
         level_map = get_singleton(LevelMap)
         current_level = level_map.index
         if current_level == 0:
-            print("You go home for tea and biscuits.")
-            raise SystemExit
-
+            return
         next_level = current_level - 1
+        _change_level(next_level, StairsUp)
+
+def change_level_up() -> None:
+    try:
+        _, (_, stair_pos) = esper.get_components(StairsUp, Position)[0]
+    except (IndexError, KeyError):
+        return
+
+    _, (_, player_pos) = get_singleton_by_components(Player, Position)
+
+    if stair_pos == player_pos:
+        level_map = get_singleton(LevelMap)
+        next_level = level_map.index + 1
         _change_level(next_level, StairsDown)
 
 def _change_level(next_level: int, spawn_on_stairs_type: type) -> None:
@@ -147,9 +145,17 @@ def restart_game() -> None:
     except KeyError:
         pass
 
-    # Create a new Player at StairsUp
+    # Create a new Player at StartPoint or StairsDown / StairsUp
     try:
-        _, (_, stair_up) = esper.get_components(StairsUp, Position)[0]
-        create_player(stair_up.x, stair_up.y)
-    except (IndexError, AssertionError):
-        create_player(1, 1)
+        _, (_, start_pos) = esper.get_components(StartPoint, Position)[0]
+        create_player(start_pos.x, start_pos.y)
+    except (IndexError, AssertionError, KeyError):
+        try:
+            _, (_, stair_pos) = esper.get_components(StairsDown, Position)[0]
+            create_player(stair_pos.x, stair_pos.y)
+        except (IndexError, AssertionError, KeyError):
+            try:
+                _, (_, stair_pos) = esper.get_components(StairsUp, Position)[0]
+                create_player(stair_pos.x, stair_pos.y)
+            except (IndexError, AssertionError, KeyError):
+                create_player(1, 1)

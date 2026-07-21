@@ -59,6 +59,14 @@ class StairsDown:
 class StairsUp:
     pass
 
+class StartPoint:
+    pass
+
+@component
+class StoryOverlay:
+    line1: str = "Waking up in this dark gloomy dungeon, I must escape!"
+    line2: str = "I wonder what is in these cages?"
+
 class Enemy:
     pass
 

@@ -168,6 +168,12 @@ class Draw(esper.Processor):
         if player.hp <= 0:
             self.ui_renderer.render_game_over()
 
+        # Render Story Overlay if active on the active world context
+        story_query = esper.get_component(StoryOverlay)
+        if story_query:
+            _, story = story_query[0]
+            self.ui_renderer.render_story_overlay(story.line1, story.line2)
+
         # Clean up finished animations
         for ent, comp_class in removals:
             if esper.has_component(ent, comp_class):
