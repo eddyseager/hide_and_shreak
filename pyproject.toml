@@ -16,7 +16,7 @@ dependencies = [
 ]
 
 [project.scripts]
-hide-and-shreak = "src.main:main"
+hide_and_shreak = "src.main:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
