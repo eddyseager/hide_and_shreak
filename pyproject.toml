@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "hide-and-shreak"
+name = "hide_and_shreak"
 version = "0.1.0"
 description = "A Python roguelike demo where your only objective is survival"
 readme = "README.md"

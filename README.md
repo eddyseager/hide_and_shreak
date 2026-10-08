@@ -29,6 +29,6 @@ powershell -ExecutionPolicy ByPass -c "irm [https://astral.sh/uv/install.ps1](ht
 
 You can launch the game straight from GitHub without cloning the repository:
 
-`uvx --from git+https://github.com/eddyseager/hide-and-shreak.git hide-and-shreak`
+`uvx --from git+https://github.com/eddyseager/hide_and_shreak.git hide_and_shreak`
 
 or clone the repository and run `uv run src/main.py`
