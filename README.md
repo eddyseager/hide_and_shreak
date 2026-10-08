@@ -27,5 +27,8 @@ curl -LsSf [https://astral.sh/uv/install.sh](https://astral.sh/uv/install.sh) | 
 powershell -ExecutionPolicy ByPass -c "irm [https://astral.sh/uv/install.ps1](https://astral.sh/uv/install.ps1) | iex"
 ```
 
-To run the game:
-`uv run src/main.py`
+You can launch the game straight from GitHub without cloning the repository:
+
+`uvx --from git+https://github.com/eddyseager/hide-and-shreak.git hide-and-shreak`
+
+or clone the repository and run `uv run src/main.py`

@@ -1,5 +1,5 @@
 [project]
-name = "rogue-engine"
+name = "hide-and-shreak"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -10,3 +10,6 @@ dependencies = [
     "pygame>=2.6.1",
     "tcod>=19.6.0",
 ]
+
+[project.scripts]
+hide-and-shreak = "src.main:main"
