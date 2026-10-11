@@ -82,7 +82,7 @@ def _change_level(next_level: int, spawn_on_stairs_type: type) -> None:
     current_turn = counter.val
 
     # Need screen to initialize draw processor on the new world
-    from processors.draw import Draw
+    from .processors.draw import Draw
     draw_proc = esper.get_processor(Draw)
     screen = draw_proc.screen
 
@@ -137,7 +137,7 @@ def restart_game() -> None:
         graphic.col = 30
 
     # Reset Spawn_Enemy processor turn state if present
-    from processors.spawn_enemy import Spawn_Enemy
+    from .processors.spawn_enemy import Spawn_Enemy
     try:
         spawn_proc = esper.get_processor(Spawn_Enemy)
         if spawn_proc:
