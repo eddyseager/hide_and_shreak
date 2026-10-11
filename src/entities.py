@@ -3,6 +3,7 @@ from random import Random
 import esper
 import numpy as np
 from .components import *
+from .resources import resource_path
 
 # Mapping of character glyphs to specific tiles: (sheet, col, row, default_fg)
 CHAR_MAP = {
@@ -112,7 +113,7 @@ BUILDER_MAP = {
 }
 
 def load_level(level: int, level_map: LevelMap) -> None:
-    with open(f'levels{os.sep}{level}.level', encoding="utf-8") as file:
+    with resource_path("levels", f"{level}.level").open(encoding="utf-8") as file:
         for y, line in enumerate(file):
             for x, c in enumerate(line.rstrip("\r\n")):
                 if c == '+':

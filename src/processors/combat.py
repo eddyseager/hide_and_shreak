@@ -1,17 +1,18 @@
 import esper
 import pygame
 from ..components import *
+from ..resources import resource_path
 
 class Combat(esper.Processor):
     def __init__(self):
         super().__init__()
         try:
-            self.hit_sound = pygame.mixer.Sound("sounds/explosion.wav")
+            self.hit_sound = pygame.mixer.Sound(resource_path("sounds", "explosion.wav"))
         except (pygame.error, FileNotFoundError):
             self.hit_sound = None
             
         try:
-            self.die_sound = pygame.mixer.Sound("sounds/explosion2.wav")
+            self.die_sound = pygame.mixer.Sound(resource_path("sounds", "explosion2.wav"))
         except (pygame.error, FileNotFoundError):
             self.die_sound = None
 

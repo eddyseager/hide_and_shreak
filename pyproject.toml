@@ -20,3 +20,9 @@ hide_and_shreak = "src.main:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
+
+[tool.hatch.build.targets.wheel.force-include]
+assets = "src/assets"
+levels = "src/levels"
+music = "src/music"
+sounds = "src/sounds"

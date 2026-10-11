@@ -1,11 +1,13 @@
 import pygame
+from ..resources import resource_path
 
 class SpriteManager:
     def __init__(self, tile_size: int, assets_prefix: str = "assets/hexanys_roguelike_tiles_0.3.0/Tilesheets/Transparent"):
         self.tile_size = tile_size
-        self.creatures_sheet = pygame.image.load(f"{assets_prefix}/creatures_transparent.png").convert_alpha()
-        self.autotile_sheet = pygame.image.load(f"{assets_prefix}/autotile_transparent.png").convert_alpha()
-        self.general_sheet = pygame.image.load(f"{assets_prefix}/general_transparent.png").convert_alpha()
+        assets_path = resource_path(*assets_prefix.split("/"))
+        self.creatures_sheet = pygame.image.load(assets_path / "creatures_transparent.png").convert_alpha()
+        self.autotile_sheet = pygame.image.load(assets_path / "autotile_transparent.png").convert_alpha()
+        self.general_sheet = pygame.image.load(assets_path / "general_transparent.png").convert_alpha()
         self.sprite_cache = {}
 
     def get_sprite(self, sheet_name: str, col: int, row: int, color: tuple) -> pygame.Surface:
