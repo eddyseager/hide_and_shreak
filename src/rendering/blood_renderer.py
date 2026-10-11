@@ -1,6 +1,6 @@
 import random
 import pygame
-from components import Blood
+from ..components import Blood
 
 class BloodRenderer:
     def __init__(self, screen: pygame.Surface, tile_size: int):

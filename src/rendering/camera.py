@@ -1,5 +1,5 @@
 import math
-from constants import MAP_WIDTH, MAP_HEIGHT
+from ..constants import MAP_WIDTH, MAP_HEIGHT
 
 class Camera:
     def __init__(self, view_width: int, view_height: int, shake_duration: int = 600, shake_intensity: int = 80):

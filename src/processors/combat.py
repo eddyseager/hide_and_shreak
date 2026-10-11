@@ -1,6 +1,6 @@
 import esper
 import pygame
-from components import *
+from ..components import *
 
 class Combat(esper.Processor):
     def __init__(self):

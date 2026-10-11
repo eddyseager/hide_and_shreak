@@ -1,5 +1,5 @@
 import pygame
-from rendering.mist_renderer import MistRenderer
+from .mist_renderer import MistRenderer
 
 class TitleRenderer:
     def __init__(self, screen: pygame.Surface, view_width: int, view_height: int, tile_size: int, font_title: pygame.font.Font, font_sub: pygame.font.Font, font_credits: pygame.font.Font = None):

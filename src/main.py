@@ -4,12 +4,12 @@ import os
 import esper
 import pygame
 from random import Random
-from components import *
-from events import on_event
-from entities import create_player
-from level_setup import init_level_world
-from constants import *
-from rendering.ui_renderer import UIRenderer
+from .components import *
+from .events import on_event
+from .entities import create_player
+from .level_setup import init_level_world
+from .constants import *
+from .rendering.ui_renderer import UIRenderer
 
 def main() -> None:
     # Pre-initialize the mixer with a low buffer size (512 bytes) to eliminate SFX latency

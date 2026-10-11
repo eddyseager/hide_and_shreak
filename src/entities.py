@@ -2,7 +2,7 @@ import os
 from random import Random
 import esper
 import numpy as np
-from components import *
+from .components import *
 
 # Mapping of character glyphs to specific tiles: (sheet, col, row, default_fg)
 CHAR_MAP = {

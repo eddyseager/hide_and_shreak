@@ -1,12 +1,12 @@
 import math
 import esper
 import pygame
-from components import *
-from rendering.sprite_manager import SpriteManager
-from rendering.vignette import VignetteRenderer
-from rendering.camera import Camera
-from rendering.blood_renderer import BloodRenderer
-from rendering.ui_renderer import UIRenderer
+from ..components import *
+from ..rendering.sprite_manager import SpriteManager
+from ..rendering.vignette import VignetteRenderer
+from ..rendering.camera import Camera
+from ..rendering.blood_renderer import BloodRenderer
+from ..rendering.ui_renderer import UIRenderer
 
 class Draw(esper.Processor):
     def __init__(self, screen, tile_size, view_width, view_height):

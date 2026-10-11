@@ -1,7 +1,7 @@
 from dataclasses import dataclass as component
 import numpy as np
 import esper
-from constants import MAP_WIDTH, MAP_HEIGHT, SPAWN_COUNT
+from .constants import MAP_WIDTH, MAP_HEIGHT, SPAWN_COUNT
 
 
 #A visible object on the map (not a floor)

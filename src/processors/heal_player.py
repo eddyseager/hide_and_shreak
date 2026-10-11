@@ -1,6 +1,6 @@
 import esper
-from components import *
-from constants import HEAL_STEPS
+from ..components import *
+from ..constants import HEAL_STEPS
 
 class HealPlayer(esper.Processor):
     def __init__(self):

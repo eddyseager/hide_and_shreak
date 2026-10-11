@@ -1,7 +1,7 @@
 import esper
 import tcod.path
 import numpy as np
-from components import *
+from .components import *
 
 def move_map(dx: int, dy: int, pos: Position) -> bool:
     dim = get_singleton(MapDimension)

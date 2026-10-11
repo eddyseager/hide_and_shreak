@@ -31,4 +31,4 @@ You can launch the game straight from GitHub without cloning the repository:
 
 `uvx --from git+https://github.com/eddyseager/hide_and_shreak.git hide_and_shreak`
 
-or clone the repository and run `uv run src/main.py`
+or clone the repository and run `uv run python -m src.main`

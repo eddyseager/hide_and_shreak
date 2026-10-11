@@ -4,8 +4,8 @@ import tcod.path
 from tcod.map import compute_fov
 import numpy as np
 import random
-from components import *
-from move import blocks_movement, check_and_open_door
+from ..components import *
+from ..move import blocks_movement, check_and_open_door
 
 class Move_Enemy(esper.Processor):
 

@@ -1,6 +1,6 @@
 import pygame
-from rendering.title_renderer import TitleRenderer
-from rendering.game_over_renderer import GameOverRenderer
+from .title_renderer import TitleRenderer
+from .game_over_renderer import GameOverRenderer
 
 class UIRenderer:
     def __init__(self, screen: pygame.Surface, view_width: int, view_height: int, tile_size: int):

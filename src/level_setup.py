@@ -1,14 +1,14 @@
 import esper
 import pygame
-from components import Counter, StoryOverlay
-from constants import TILE_SIZE, VIEW_WIDTH, VIEW_HEIGHT
-from entities import create_map_dimension, create_level
-from processors.move_enemy import Move_Enemy
-from processors.update_fov import Update_FOV
-from processors.combat import Combat
-from processors.spawn_enemy import Spawn_Enemy
-from processors.draw import Draw
-from processors.heal_player import HealPlayer
+from .components import Counter, StoryOverlay
+from .constants import TILE_SIZE, VIEW_WIDTH, VIEW_HEIGHT
+from .entities import create_map_dimension, create_level
+from .processors.move_enemy import Move_Enemy
+from .processors.update_fov import Update_FOV
+from .processors.combat import Combat
+from .processors.spawn_enemy import Spawn_Enemy
+from .processors.draw import Draw
+from .processors.heal_player import HealPlayer
 
 def init_level_world(level: int, screen: pygame.Surface, turn_counter_val: int = 0) -> None:
     # Register processors on the active world context

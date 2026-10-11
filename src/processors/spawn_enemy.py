@@ -1,8 +1,8 @@
 from typing import Optional
 import esper
-from components import *
+from ..components import *
 import random as rng
-from entities import create_enemy
+from ..entities import create_enemy
 
 class Spawn_Enemy(esper.Processor):
 

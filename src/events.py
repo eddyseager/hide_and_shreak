@@ -1,8 +1,8 @@
 import esper
 import pygame
-from constants import TOGGLE_DISPLAY_EVENT
-from components import Player, StoryOverlay
-import player_events
+from .constants import TOGGLE_DISPLAY_EVENT
+from .components import Player, StoryOverlay
+from . import player_events
 
 def on_event(event: pygame.event.Event) -> None:
     if event.type == pygame.KEYDOWN:

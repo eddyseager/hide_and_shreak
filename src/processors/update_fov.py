@@ -1,5 +1,5 @@
 import esper
-from components import *
+from ..components import *
 from tcod.map import compute_fov
 
 class Update_FOV(esper.Processor):

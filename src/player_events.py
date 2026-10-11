@@ -1,10 +1,10 @@
 import esper
 import pygame
 import random
-from move import move_map, check_and_open_door
-from components import *
-from level_setup import init_level_world
-from entities import create_player
+from .move import move_map, check_and_open_door
+from .components import *
+from .level_setup import init_level_world
+from .entities import create_player
 
 def move_player(dx: int, dy: int) -> None:
     player_ent, (player, pos) = get_singleton_by_components(Player, Position)
