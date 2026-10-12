@@ -12,6 +12,7 @@ class UIRenderer:
         self._font_sub = None
         self._font_credits = None
         self._backdrop_banner = None
+        self._title_renderer = None
 
     def _get_fonts(self):
         if self._font_title is None:
@@ -34,8 +35,17 @@ class UIRenderer:
 
     def render_title_screen(self):
         font_title, font_sub, font_credits = self._get_fonts()
-        renderer = TitleRenderer(self.screen, self.view_width, self.view_height, self.tile_size, font_title, font_sub, font_credits)
-        renderer.render()
+        if self._title_renderer is None:
+            self._title_renderer = TitleRenderer(
+                self.screen,
+                self.view_width,
+                self.view_height,
+                self.tile_size,
+                font_title,
+                font_sub,
+                font_credits,
+            )
+        self._title_renderer.render()
 
     def render_game_over(self):
         font_title, font_sub, _ = self._get_fonts()
@@ -59,8 +69,8 @@ class UIRenderer:
 
         box_surf = pygame.Surface((box_w, box_h), pygame.SRCALPHA)
         box_surf.fill((10, 10, 18, 235))
-        # Gold/white border around story box
-        pygame.draw.rect(box_surf, (190, 170, 110), (0, 0, box_w, box_h), 2)
+        # grey border around story box
+        pygame.draw.rect(box_surf, (65, 65, 65), (0, 0, box_w, box_h), 2)
         self.screen.blit(box_surf, (box_x, box_y))
 
         # 2. Story text lines

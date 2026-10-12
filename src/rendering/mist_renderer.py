@@ -13,9 +13,11 @@ class MistRenderer:
         for _ in range(48):
             w_size = self.rng.randint(220, 480)
             h_size = self.rng.randint(50, 150)
+            base_alpha = self.rng.randint(130, 220)
 
-            # Generate 1:1 HD wisp surface without low-res downscaling
-            wisp_surf = self._generate_hd_wisp(w_size, h_size, self.rng)
+            # Keep transparency in the pixels themselves. Pygame's per-pixel
+            # alpha and blanket surface alpha do not combine consistently.
+            wisp_surf = self._generate_hd_wisp(w_size, h_size, self.rng, base_alpha)
 
             self.particles.append({
                 'surf': wisp_surf,
@@ -27,11 +29,9 @@ class MistRenderer:
                 'freq': self.rng.uniform(0.0007, 0.0022),
                 'phase': self.rng.uniform(0.0, 6.28),
                 'amp': self.rng.uniform(6.0, 24.0),
-                'alpha_freq': self.rng.uniform(0.0008, 0.0028),
-                'base_alpha': self.rng.randint(130, 220),
             })
 
-    def _generate_hd_wisp(self, w: int, h: int, rng: random.Random) -> pygame.Surface:
+    def _generate_hd_wisp(self, w: int, h: int, rng: random.Random, opacity: int) -> pygame.Surface:
         # Full 1:1 High-Definition surface (no resolution scaling)
         surf = pygame.Surface((w, h), pygame.SRCALPHA)
         surf.fill((0, 0, 0, 0))
@@ -53,7 +53,7 @@ class MistRenderer:
                 curr_h = int(eh * factor)
                 rx = (ew - curr_w) // 2
                 ry = (eh - curr_h) // 2
-                alpha = int(10 * (1.0 - factor))
+                alpha = int(55 * opacity / 255 * (1.0 - factor))
                 if alpha > 0 and curr_w > 0 and curr_h > 0:
                     pygame.draw.ellipse(sub_puff, (*color, alpha), (rx, ry, curr_w, curr_h))
 
@@ -68,9 +68,4 @@ class MistRenderer:
             px = (p['x'] + time * p['speed_x'] * 0.05) % (scr_w + p['width']) - p['width']
             py = p['base_y'] + math.sin(time * p['freq'] + p['phase']) * p['amp']
 
-            # Smooth alpha modulation (crystal-clear HD rendering with zero rescaling artifacts)
-            alpha_mult = 0.75 + math.sin(time * p['alpha_freq'] + p['phase']) * 0.25
-            cur_alpha = int(p['base_alpha'] * alpha_mult)
-
-            p['surf'].set_alpha(max(0, min(255, cur_alpha)))
             screen.blit(p['surf'], (int(px), int(py)))
