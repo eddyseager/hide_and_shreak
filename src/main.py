@@ -63,6 +63,8 @@ def main() -> None:
                             game_initialized = True
                     elif event.key == pygame.K_ESCAPE:
                         running = False
+                    elif event.key == pygame.K_f:
+                        pygame.display.toggle_fullscreen()
         elif state == "PLAYING":
             # Run ECS processing
             esper.process()

@@ -53,6 +53,14 @@ class TitleRenderer:
         self.screen.blit(quit_shadow, quit_shadow.get_rect(center=(cx + 2, quit_y + 2)))
         self.screen.blit(quit_text, quit_text.get_rect(center=(cx, quit_y)))
 
+        fullscreen_str = "Press F for Fullscreen"
+        fullscreen_shadow = self.font_sub.render(fullscreen_str, True, (0, 0, 0))
+        fullscreen_text = self.font_sub.render(fullscreen_str, True, (200, 200, 200))
+
+        fullscreen_y = cy + 130
+        self.screen.blit(fullscreen_shadow, fullscreen_shadow.get_rect(center=(cx + 2, fullscreen_y + 2)))
+        self.screen.blit(fullscreen_text, fullscreen_text.get_rect(center=(cx, fullscreen_y)))
+
         # 5. Credits
         credit1_str = "Code & Music by Edwin van Seagull"
         credit1_shadow = self.font_credits.render(credit1_str, True, (0, 0, 0))
