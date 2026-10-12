@@ -64,8 +64,8 @@ class StartPoint:
 
 @component
 class StoryOverlay:
-    line1: str = "Waking up in this dark gloomy dungeon, I must escape!"
-    line2: str = "I wonder what is in these cages?"
+    line1: str = "Where am I? I need to find a way out."
+    line2: str = "I wonder what is in those cages?"
 
 class Enemy:
     pass

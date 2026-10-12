@@ -9,6 +9,7 @@ class UIRenderer:
         self.view_height = view_height
         self.tile_size = tile_size
         self._font_title = None
+        self._font_story = None
         self._font_sub = None
         self._font_credits = None
         self._backdrop_banner = None
@@ -56,7 +57,9 @@ class UIRenderer:
         renderer.render()
 
     def render_story_overlay(self, line1: str, line2: str):
-        font_title, font_sub, _ = self._get_fonts()
+        if self._font_story is None:
+            gothic_fonts = ["oldenglishtext", "blackadderitc", "chiller", "goudyoldstyle", "georgia", "serif"]
+            self._font_story = pygame.font.SysFont(gothic_fonts, 30)
         screen_w = self.view_width * self.tile_size
         screen_h = self.view_height * self.tile_size
         cx = screen_w // 2
@@ -74,8 +77,8 @@ class UIRenderer:
         self.screen.blit(box_surf, (box_x, box_y))
 
         # 2. Story text lines
-        text1 = font_sub.render(line1, True, (255, 245, 210))
-        text2 = font_sub.render(line2, True, (230, 220, 200))
+        text1 = self._font_story.render(line1, True, (255, 245, 210))
+        text2 = self._font_story.render(line2, True, (230, 220, 200))
         prompt_text = pygame.font.SysFont(["segoeui", "arial", "sans-serif"], 20, italic=True).render("[ Press any key to continue ]", True, (170, 170, 180))
 
         self.screen.blit(text1, text1.get_rect(center=(cx, box_y + 30)))
