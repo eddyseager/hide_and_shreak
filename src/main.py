@@ -1,10 +1,13 @@
 from __future__ import annotations
 
-import os
 import esper
 import pygame
-from random import Random
-from .components import *
+
+# Initialize audio before importing game modules that load sound files.
+pygame.mixer.pre_init(44100, -16, 2, 512)
+pygame.mixer.init()
+
+from .components import Position, StartPoint
 from .events import on_event
 from .entities import create_player
 from .level_setup import init_level_world
@@ -13,10 +16,7 @@ from .rendering.ui_renderer import UIRenderer
 from .resources import resource_path
 
 def main() -> None:
-    # Pre-initialize the mixer with a low buffer size (512 bytes) to eliminate SFX latency
-    pygame.mixer.pre_init(44100, -16, 2, 512)
     pygame.init()
-    pygame.mixer.init()
     pygame.key.set_repeat(250, 130)
 
     # Play title music initially

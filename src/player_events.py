@@ -12,7 +12,7 @@ def move_player(dx: int, dy: int) -> None:
     
     if move_map(dx, dy, pos):
         # Open door if player stepped on one
-        check_and_open_door(pos.x, pos.y)
+        check_and_open_door(pos.x, pos.y, player_opened=True)
         
         # Drop blood on the previous tile if player is injured
         if player.hp < player.max_hp:
