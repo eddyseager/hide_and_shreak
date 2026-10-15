@@ -12,7 +12,7 @@ class Combat(esper.Processor):
             self.hit_sound = None
             
         try:
-            self.die_sound = pygame.mixer.Sound(resource_path("sounds", "explosion2.wav"))
+            self.die_sound = pygame.mixer.Sound(resource_path("sounds", "die.wav"))
         except (pygame.error, FileNotFoundError):
             self.die_sound = None
 
