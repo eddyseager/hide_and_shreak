@@ -8,7 +8,7 @@ VIEW_HEIGHT = 10
 # Map configurations
 MAP_WIDTH = 60
 MAP_HEIGHT = 24
-SPAWN_COUNT = 8
+SPAWN_COUNT = 3
 HEAL_STEPS = 20
 
 # Custom Pygame Events
