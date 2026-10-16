@@ -1,5 +1,6 @@
 import esper
 import pygame
+import random
 import tcod.path
 import numpy as np
 from tcod.map import compute_fov
@@ -8,6 +9,15 @@ from .resources import resource_path
 
 door_sound = pygame.mixer.Sound(resource_path("sounds", "door.wav"))
 door_sound.set_volume(0.3)
+move_sounds = [
+    pygame.mixer.Sound(resource_path("sounds", filename))
+    for filename in ("move1.wav", "move2.wav", "move3.wav")
+]
+for sound in move_sounds:
+    sound.set_volume(0.08)
+
+def play_move_sound() -> None:
+    random.choice(move_sounds).play()
 
 def move_map(dx: int, dy: int, pos: Position) -> bool:
     dim = get_singleton(MapDimension)

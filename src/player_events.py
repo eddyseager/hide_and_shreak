@@ -1,7 +1,7 @@
 import esper
 import pygame
 import random
-from .move import move_map, check_and_open_door
+from .move import move_map, check_and_open_door, play_move_sound
 from .components import *
 from .level_setup import init_level_world
 from .entities import create_player
@@ -11,6 +11,8 @@ def move_player(dx: int, dy: int) -> None:
     old_x, old_y = pos.x, pos.y
     
     if move_map(dx, dy, pos):
+        play_move_sound()
+
         # Open door if player stepped on one
         check_and_open_door(pos.x, pos.y, player_opened=True)
         
