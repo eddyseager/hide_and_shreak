@@ -13,6 +13,8 @@ class Update_FOV(esper.Processor):
             pygame.mixer.Sound(resource_path("sounds", filename))
             for filename in ("roar1.wav", "roar2.wav", "roar3.wav", "roar4.wav", "roar5.wav")
         ]
+        for sound in self.roar_sounds:
+            sound.set_volume(0.4)
 
     def process(self):
         _, (_, player_pos) = get_singleton_by_components(Player, Position)
