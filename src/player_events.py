@@ -5,6 +5,12 @@ from .move import move_map, check_and_open_door, play_move_sound
 from .components import *
 from .level_setup import init_level_world
 from .entities import create_player
+from .resources import resource_path
+
+up_stairs_sound = pygame.mixer.Sound(resource_path("sounds", "up.wav"))
+up_stairs_sound.set_volume(0.5)
+down_stairs_sound = pygame.mixer.Sound(resource_path("sounds", "down.wav"))
+down_stairs_sound.set_volume(0.5)
 
 def move_player(dx: int, dy: int) -> None:
     player_ent, (player, pos) = get_singleton_by_components(Player, Position)
@@ -58,6 +64,7 @@ def change_level_down() -> None:
             return
         next_level = current_level - 1
         _change_level(next_level, StairsUp)
+        down_stairs_sound.play()
 
 def change_level_up() -> None:
     try:
@@ -71,6 +78,7 @@ def change_level_up() -> None:
         level_map = get_singleton(LevelMap)
         next_level = level_map.index + 1
         _change_level(next_level, StairsDown)
+        up_stairs_sound.play()
 
 def _change_level(next_level: int, spawn_on_stairs_type: type) -> None:
     player_ent, (player_comp, player_pos) = get_singleton_by_components(Player, Position)

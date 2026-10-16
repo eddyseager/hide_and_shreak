@@ -14,7 +14,7 @@ move_sounds = [
     for filename in ("move1.wav", "move2.wav", "move3.wav")
 ]
 for sound in move_sounds:
-    sound.set_volume(0.08)
+    sound.set_volume(0.05)
 
 def play_move_sound() -> None:
     random.choice(move_sounds).play()
