@@ -3,6 +3,7 @@ import pygame
 import random
 from .move import move_map, check_and_open_door, play_move_sound
 from .components import *
+from .constants import SCREAM_CHARGE_REQUIRED
 from .level_setup import init_level_world
 from .entities import create_player
 from .resources import resource_path
@@ -24,6 +25,7 @@ def move_player(dx: int, dy: int) -> None:
     
     if move_map(dx, dy, pos):
         play_move_sound()
+        player.scream_charge = min(SCREAM_CHARGE_REQUIRED, player.scream_charge + 1)
 
         # Open door if player stepped on one
         check_and_open_door(pos.x, pos.y, player_opened=True)
@@ -57,6 +59,11 @@ def move_player(dx: int, dy: int) -> None:
 
 def shreak() -> None:
     player_ent, (_, player_pos) = get_singleton_by_components(Player, Position)
+    player = esper.component_for_entity(player_ent, Player)
+    if player.scream_charge < SCREAM_CHARGE_REQUIRED:
+        return
+
+    player.scream_charge = 0
 
     if esper.has_component(player_ent, ScreamEffect):
         esper.remove_component(player_ent, ScreamEffect)
@@ -105,6 +112,7 @@ def _change_level(next_level: int, spawn_on_stairs_type: type) -> None:
     current_max_hp = player_comp.max_hp
     current_steps = player_comp.steps_since_hit
     current_just_hit = player_comp.just_hit
+    current_scream_charge = player_comp.scream_charge
 
     counter = get_singleton(Counter)
     current_turn = counter.val
@@ -137,6 +145,7 @@ def _change_level(next_level: int, spawn_on_stairs_type: type) -> None:
     p_comp.max_hp = current_max_hp
     p_comp.steps_since_hit = current_steps
     p_comp.just_hit = current_just_hit
+    p_comp.scream_charge = current_scream_charge
 
 def restart_game() -> None:
     # Convert current dead player into a Corpse component

@@ -1,6 +1,7 @@
 import esper
 import pygame
-from ..components import Enemy, Position, ScreamEffect
+from ..components import Enemy, Player, Position, ScreamEffect
+from ..constants import SCREAM_CHARGE_REQUIRED
 
 
 class Scream(esper.Processor):
@@ -13,6 +14,11 @@ class Scream(esper.Processor):
         if effect.damage_complete:
             return
 
+        player_query = esper.get_component(Player)
+        if not player_query:
+            return
+        player = player_query[0][1]
+
         elapsed = pygame.time.get_ticks() - effect.start_time
         progress = min(1.0, elapsed / effect.wave_duration)
         wave_radius = effect.radius * progress
@@ -23,6 +29,10 @@ class Scream(esper.Processor):
             dy = enemy_pos.y - effect.center_y
             if dx * dx + dy * dy <= wave_radius_squared:
                 esper.delete_entity(enemy_ent, immediate=True)
+                player.scream_charge = min(
+                    SCREAM_CHARGE_REQUIRED,
+                    player.scream_charge + 1,
+                )
 
         if progress >= 1.0:
             effect.damage_complete = True

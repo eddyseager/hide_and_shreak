@@ -20,6 +20,7 @@ class Player:
     max_hp: int = 3
     steps_since_hit: int = 0
     just_hit: bool = False
+    scream_charge: int = 0
 
 class Wall:
     pass

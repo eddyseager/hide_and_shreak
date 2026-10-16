@@ -2,6 +2,7 @@ import math
 import esper
 import pygame
 from ..components import *
+from ..constants import SCREAM_CHARGE_REQUIRED
 from ..rendering.sprite_manager import SpriteManager
 from ..rendering.vignette import VignetteRenderer
 from ..rendering.camera import Camera
@@ -201,6 +202,7 @@ class Draw(esper.Processor):
 
         # Draw the vignette last so its black corners cover the injury tint.
         self.screen.blit(vignette, (0, 0))
+        self.ui_renderer.render_scream_orb(player.scream_charge, SCREAM_CHARGE_REQUIRED)
 
         # Render Game Over text if player health is 0
         if player.hp <= 0:
