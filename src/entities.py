@@ -32,8 +32,49 @@ WALL_MAP = {
     '╬': ('autotile', 8, 4, (110, 110, 110)),
 }
 
+# Standard floor sprites and their relative selection weights.
+FLOOR_VARIANTS = {
+    'dot': {
+        'tile': (1, 0),
+        'weight': 12,
+        'tints': [(139, 90, 43)],
+    },
+    'plant': {
+        'tile': (0, 1),
+        'weight': 1,
+        'tints': [
+            (139, 90, 43),
+            (65, 110, 55), (86, 130, 65), (48, 95, 45),
+            (115, 70, 130), (140, 85, 155), (90, 55, 115),
+        ],
+    },
+    'stones': {
+        'tile': (1, 2),
+        'weight': 1,
+        'tints': [(75, 75, 75)],
+    },
+    'square': {
+        'tile': (0, 0),
+        'weight': 1,
+        'tints': [
+            (139, 90, 43), (120, 78, 40), (158, 111, 62),
+            (65, 65, 65), (80, 80, 80), (95, 95, 95),
+        ],
+    },
+}
+
 def get_graphic_for_char(g: str) -> Graphic:
-    if g in WALL_MAP:
+    if g == '.':
+        rng = Random()
+        variant = rng.choices(
+            list(FLOOR_VARIANTS.values()),
+            weights=[variant['weight'] for variant in FLOOR_VARIANTS.values()],
+            k=1,
+        )[0]
+        col, row = variant['tile']
+        color = rng.choice(variant['tints'])
+        sheet = 'general'
+    elif g in WALL_MAP:
         sheet, col, row, color = WALL_MAP[g]
     elif ord(g) & 0xFF00 == 0x2500 or g == '#': #Fallback wall
         sheet, col, row, color = ('autotile', 1, 3, (110, 110, 110))
