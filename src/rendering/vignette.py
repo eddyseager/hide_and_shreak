@@ -18,12 +18,13 @@ class VignetteRenderer:
 
         # Determine vignette color based on player hp
         if hp == 1:
-            vignette_color = (120, 0, 0)
+            # Keep the regular vignette strength; the injury tint is drawn separately.
+            vignette_color = (20, 20, 20)
         elif hp <= 0:
             vignette_color = (255, 0, 0)
             vignette_low.fill((255, 0, 0, 180))
         else:
-            vignette_color = (0, 0, 0)
+            vignette_color = (20, 20, 20)
 
         # Center spotlight on player's screen tile position
         px_ratio = (player_screen_x * self.tile_size + self.tile_size // 2) / w
@@ -44,13 +45,9 @@ class VignetteRenderer:
             ry = cy - ellipse_h // 2
 
             norm_factor = factor / max_factor
-            if hp == 0:
+            if hp <= 1:
                 alpha = int(255 * (norm_factor ** 0.45))
                 alpha = max(0, min(alpha, 255))
-            elif hp == 1:
-                clamped_factor = min(1.0, norm_factor * 1.25)
-                alpha = int(140 * (clamped_factor ** 0.65))
-                alpha = max(0, min(alpha, 140))
             else:
                 clamped_factor = min(1.0, norm_factor * 1.25)
                 alpha = int(250 * (clamped_factor ** 0.65))
@@ -63,3 +60,4 @@ class VignetteRenderer:
         vignette_surf = pygame.transform.smoothscale(vignette_low, (w, h))
         self.cache[key] = vignette_surf
         return vignette_surf
+

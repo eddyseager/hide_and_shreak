@@ -19,6 +19,7 @@ class Draw(esper.Processor):
         self.sprite_manager = SpriteManager(tile_size)
         self.sprite_cache = self.sprite_manager.sprite_cache
         self.vignette_renderer = VignetteRenderer(tile_size, self.sprite_cache)
+        self.injury_overlay = None
         self.camera = Camera(view_width, view_height)
         self.blood_renderer = BloodRenderer(screen, tile_size)
         self.ui_renderer = UIRenderer(screen, view_width, view_height, tile_size)
@@ -161,6 +162,14 @@ class Draw(esper.Processor):
             int(player_screen_x),
             int(player_screen_y)
         )
+        if player.hp == 1:
+            overlay_size = self.screen.get_size()
+            if self.injury_overlay is None or self.injury_overlay.get_size() != overlay_size:
+                self.injury_overlay = pygame.Surface(overlay_size, pygame.SRCALPHA)
+                self.injury_overlay.fill((150, 0, 0, 100))
+            self.screen.blit(self.injury_overlay, (0, 0))
+
+        # Draw the vignette last so its black corners cover the injury tint.
         self.screen.blit(vignette, (0, 0))
 
         # Render Game Over text if player health is 0
