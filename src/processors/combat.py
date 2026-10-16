@@ -1,15 +1,18 @@
 import esper
 import pygame
+import random
 from ..components import *
 from ..resources import resource_path
 
 class Combat(esper.Processor):
     def __init__(self):
         super().__init__()
-        try:
-            self.hit_sound = pygame.mixer.Sound(resource_path("sounds", "explosion.wav"))
-        except (pygame.error, FileNotFoundError):
-            self.hit_sound = None
+        self.hit_sounds = []
+        for filename in ("explosion.wav", "explosion2.wav", "explosion3.wav"):
+            try:
+                self.hit_sounds.append(pygame.mixer.Sound(resource_path("sounds", filename)))
+            except (pygame.error, FileNotFoundError):
+                pass
             
         try:
             self.die_sound = pygame.mixer.Sound(resource_path("sounds", "die.wav"))
@@ -38,7 +41,7 @@ class Combat(esper.Processor):
                     if self.die_sound:
                         self.die_sound.play()
                 else:
-                    if self.hit_sound:
-                        self.hit_sound.play()
+                    if self.hit_sounds:
+                        random.choice(self.hit_sounds).play()
                     
                 esper.delete_entity(e)
