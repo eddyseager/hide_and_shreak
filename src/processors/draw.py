@@ -20,6 +20,7 @@ class Draw(esper.Processor):
         self.sprite_cache = self.sprite_manager.sprite_cache
         self.vignette_renderer = VignetteRenderer(tile_size, self.sprite_cache)
         self.injury_overlay = None
+        self.effect_surface = None
         self.camera = Camera(view_width, view_height)
         self.blood_renderer = BloodRenderer(screen, tile_size)
         self.ui_renderer = UIRenderer(screen, view_width, view_height, tile_size)
@@ -153,6 +154,35 @@ class Draw(esper.Processor):
             self.tile_size
         )
         self.screen.blit(player_sprite, player_rect)
+
+        if esper.has_component(player_ent, ScreamEffect):
+            effect = esper.component_for_entity(player_ent, ScreamEffect)
+            elapsed = time - effect.start_time
+            if elapsed >= effect.duration:
+                removals.append((player_ent, ScreamEffect))
+            else:
+                effect_size = self.screen.get_size()
+                if self.effect_surface is None or self.effect_surface.get_size() != effect_size:
+                    self.effect_surface = pygame.Surface(effect_size, pygame.SRCALPHA)
+                self.effect_surface.fill((0, 0, 0, 0))
+
+                progress = min(1.0, elapsed / effect.wave_duration)
+                radius_px = max(1, int(effect.radius * self.tile_size * progress))
+                fade_duration = effect.duration - effect.wave_duration
+                fade_progress = max(0.0, (elapsed - effect.wave_duration) / fade_duration)
+                alpha = max(0, int(220 * (1.0 - fade_progress)))
+                center = (
+                    int((effect.center_x - camera_x) * self.tile_size + self.tile_size / 2 + shake_x),
+                    int((effect.center_y - camera_y) * self.tile_size + self.tile_size / 2),
+                )
+                pygame.draw.circle(
+                    self.effect_surface,
+                    (255, 255, 255, alpha),
+                    center,
+                    radius_px,
+                    width=max(2, self.tile_size // 8),
+                )
+                self.screen.blit(self.effect_surface, (0, 0))
 
         # Draw smooth radial vignette overlay centered on the player's screen position
         vignette = self.get_vignette(

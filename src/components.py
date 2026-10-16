@@ -45,6 +45,16 @@ class MovementAnim:
     duration: int = 120
 
 @component
+class ScreamEffect:
+    center_x: int
+    center_y: int
+    start_time: int
+    duration: int = 550
+    wave_duration: int = 400
+    radius: int = 4
+    damage_complete: bool = False
+
+@component
 class EnemyAI:
     state: str = "explore"
     explored: np.ndarray = None

@@ -11,6 +11,12 @@ up_stairs_sound = pygame.mixer.Sound(resource_path("sounds", "up.wav"))
 up_stairs_sound.set_volume(0.5)
 down_stairs_sound = pygame.mixer.Sound(resource_path("sounds", "down.wav"))
 down_stairs_sound.set_volume(0.5)
+scream_sounds = [
+    pygame.mixer.Sound(resource_path("sounds", filename))
+    for filename in ("scream1.wav", "scream2.wav", "scream3.wav")
+]
+for sound in scream_sounds:
+    sound.set_volume(0.5)
 
 def move_player(dx: int, dy: int) -> None:
     player_ent, (player, pos) = get_singleton_by_components(Player, Position)
@@ -48,6 +54,18 @@ def move_player(dx: int, dy: int) -> None:
         # Successful step: increment general turn counter
         counter = get_singleton(Counter)
         counter.val += 1
+
+def shreak() -> None:
+    player_ent, (_, player_pos) = get_singleton_by_components(Player, Position)
+
+    if esper.has_component(player_ent, ScreamEffect):
+        esper.remove_component(player_ent, ScreamEffect)
+    esper.add_component(player_ent, ScreamEffect(
+        center_x=player_pos.x,
+        center_y=player_pos.y,
+        start_time=pygame.time.get_ticks()
+    ))
+    random.choice(scream_sounds).play()
 
 def change_level_down() -> None:
     try:
