@@ -2,6 +2,7 @@ import os
 from random import Random
 import esper
 import numpy as np
+import tcod.noise
 from .components import *
 from .resources import resource_path
 
@@ -32,16 +33,14 @@ WALL_MAP = {
     '╬': ('autotile', 8, 4, (110, 110, 110)),
 }
 
-# Standard floor sprites and their relative selection weights.
+# Standard floor sprites and their tint palettes.
 FLOOR_VARIANTS = {
     'dot': {
         'tile': (1, 0),
-        'weight': 12,
         'tints': [(139, 90, 43)],
     },
     'plant': {
         'tile': (0, 1),
-        'weight': 1,
         'tints': [
             (139, 90, 43),
             (65, 110, 55), (86, 130, 65), (48, 95, 45),
@@ -50,12 +49,10 @@ FLOOR_VARIANTS = {
     },
     'stones': {
         'tile': (1, 2),
-        'weight': 1,
         'tints': [(75, 75, 75)],
     },
     'square': {
         'tile': (0, 0),
-        'weight': 1,
         'tints': [
             (139, 90, 43), (120, 78, 40), (158, 111, 62),
             (65, 65, 65), (80, 80, 80), (95, 95, 95),
@@ -63,16 +60,11 @@ FLOOR_VARIANTS = {
     },
 }
 
-def get_graphic_for_char(g: str) -> Graphic:
+def get_graphic_for_char(g: str, floor_variant: str = 'dot', floor_seed=None) -> Graphic:
     if g == '.':
-        rng = Random()
-        variant = rng.choices(
-            list(FLOOR_VARIANTS.values()),
-            weights=[variant['weight'] for variant in FLOOR_VARIANTS.values()],
-            k=1,
-        )[0]
+        variant = FLOOR_VARIANTS[floor_variant]
         col, row = variant['tile']
-        color = rng.choice(variant['tints'])
+        color = Random(floor_seed).choice(variant['tints'])
         sheet = 'general'
     elif g in WALL_MAP:
         sheet, col, row, color = WALL_MAP[g]
@@ -131,8 +123,17 @@ def create_wall(x: int, y: int, g: str, level_map: LevelMap) -> None:
     level_map.transparent[x, y] = False
     level_map.walkable[x, y] = False
 
-def create_floor(x: int, y: int, g: str) -> None:
-    esper.create_entity(Floor(), Position(x, y), get_graphic_for_char(g))
+def create_floor(
+    x: int,
+    y: int,
+    g: str,
+    variant: str = 'dot',
+    level: int = 0,
+    tint_seed: str | None = None,
+) -> None:
+    floor_seed = tint_seed or f'{level}:{x}:{y}'
+    graphic = get_graphic_for_char(g, floor_variant=variant, floor_seed=floor_seed)
+    esper.create_entity(Floor(), Position(x, y), graphic)
 
 def create_map_dimension() -> None:
     esper.create_entity(MapDimension(MAP_HEIGHT, MAP_WIDTH))
@@ -149,22 +150,99 @@ BUILDER_MAP = {
     '<': create_stairs_up,
     '>': create_stairs_down,
     'S': create_start_point,
-    '.': lambda x, y: create_floor(x, y, '.'),
     ',': lambda x, y: create_floor(x, y, ','),
 }
 
+def _assign_floor_variants(lines: list[str], level: int) -> dict[tuple[int, int], tuple[str, str]]:
+    """Use low-frequency Perlin noise to place alternate floor sprites in patches."""
+    floor_positions = [
+        (x, y)
+        for y, line in enumerate(lines)
+        for x, tile in enumerate(line)
+        if tile == '.'
+    ]
+    if not floor_positions:
+        return {}
+
+    height = len(lines)
+    width = max(map(len, lines))
+    y_grid, x_grid = np.mgrid[0:height, 0:width]
+    points = np.stack((x_grid, y_grid), axis=0).astype(np.float32) * 0.18
+
+    def sample_floor_noise(seed: int) -> np.ndarray:
+        noise = tcod.noise.Noise(
+            dimensions=2,
+            algorithm=tcod.noise.Algorithm.PERLIN,
+            seed=seed,
+        )
+        return noise.sample_mgrid(points)
+
+    location_noise = sample_floor_noise(level)
+
+    # Keep roughly 20% of the floor varied, grouping similar noise values together.
+    varied_count = round(len(floor_positions) * 0.20)
+    if varied_count == 0:
+        return {}
+    varied_positions = sorted(
+        floor_positions,
+        key=lambda position: location_noise[position[1], position[0]],
+    )[-varied_count:]
+
+    # A second smooth field assigns one variant to each broad patch, so different
+    # sprites do not alternate tile by tile inside the varied areas.
+    variant_noise = sample_floor_noise(level + 100_003)
+    varied_positions.sort(key=lambda position: variant_noise[position[1], position[0]])
+    alternate_variants = ('plant', 'stones', 'square')
+    variant_by_position: dict[tuple[int, int], str] = {}
+    for index, position in enumerate(varied_positions):
+        variant_index = min(index * len(alternate_variants) // varied_count, len(alternate_variants) - 1)
+        variant_by_position[position] = alternate_variants[variant_index]
+
+    # Give each connected same-variant patch one tint seed, keeping its color uniform.
+    tint_seed_by_position: dict[tuple[int, int], str] = {}
+    unassigned = set(variant_by_position)
+    while unassigned:
+        patch_seed = min(unassigned, key=lambda position: (position[1], position[0]))
+        patch_variant = variant_by_position[patch_seed]
+        patch = [patch_seed]
+        unassigned.remove(patch_seed)
+
+        for x, y in patch:
+            for neighbor in ((x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)):
+                if neighbor in unassigned and variant_by_position[neighbor] == patch_variant:
+                    unassigned.remove(neighbor)
+                    patch.append(neighbor)
+
+        tint_seed = f'{level}:{patch_seed[0]}:{patch_seed[1]}'
+        for position in patch:
+            tint_seed_by_position[position] = tint_seed
+
+    return {
+        position: (variant, tint_seed_by_position[position])
+        for position, variant in variant_by_position.items()
+    }
+
 def load_level(level: int, level_map: LevelMap) -> None:
     with resource_path("levels", f"{level}.level").open(encoding="utf-8") as file:
-        for y, line in enumerate(file):
-            for x, c in enumerate(line.rstrip("\r\n")):
-                if c == '+':
-                    create_door(x, y, level_map)
-                elif c == '§':
-                    create_spawn_point(x, y, level_map)
-                elif c in BUILDER_MAP:
-                    BUILDER_MAP[c](x, y)
-                elif ord(c) & 0xFF00 == 0x2500:
-                    create_wall(x, y, c, level_map)
+        lines = [line.rstrip("\r\n") for line in file]
+
+    floor_variants = _assign_floor_variants(lines, level)
+    for y, line in enumerate(lines):
+        for x, c in enumerate(line):
+            if c == '+':
+                create_door(x, y, level_map)
+            elif c == '§':
+                create_spawn_point(x, y, level_map)
+            elif c == '.':
+                variant, tint_seed = floor_variants.get(
+                    (x, y),
+                    ('dot', f'{level}:{x}:{y}'),
+                )
+                create_floor(x, y, c, variant, level, tint_seed)
+            elif c in BUILDER_MAP:
+                BUILDER_MAP[c](x, y)
+            elif ord(c) & 0xFF00 == 0x2500:
+                create_wall(x, y, c, level_map)
 
 def create_level(level: int) -> None:
     trans = np.ones((MAP_WIDTH, MAP_HEIGHT), dtype=bool, order="F")
