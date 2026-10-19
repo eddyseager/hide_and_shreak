@@ -51,6 +51,8 @@ class Draw(esper.Processor):
         # Get visual position for camera tracking
         player_visual_x, player_visual_y = player_pos.x, player_pos.y
         player_hop_y = 0
+        player_idle_y = 0
+        player_idle_stretch = 0
         if esper.has_component(player_ent, MovementAnim):
             anim = esper.component_for_entity(player_ent, MovementAnim)
             elapsed = time - anim.start_time
@@ -62,6 +64,11 @@ class Draw(esper.Processor):
                 player_visual_x = anim.start_x + (anim.target_x - anim.start_x) * t_eased
                 player_visual_y = anim.start_y + (anim.target_y - anim.start_y) * t_eased
                 player_hop_y = -int(math.sin(t * math.pi) * 7)
+        elif player.hp > 0:
+            # Keep the bob and squash/stretch in the same, faster motion cycle.
+            idle_phase = time * 0.02
+            player_idle_y = round(math.sin(idle_phase) * 3)
+            player_idle_stretch = round(-math.sin(idle_phase) * 2)
 
         # Calculate camera offset to center on player's visual path
         camera_x, camera_y = self.camera.get_camera_offset(player_visual_x, player_visual_y)
@@ -148,11 +155,16 @@ class Draw(esper.Processor):
         player_sprite = self.get_sprite(player_graphic.sheet, player_graphic.col, player_graphic.row, player_color)
         if player.hp <= 0:
             player_sprite = pygame.transform.rotate(player_sprite, -90)
+        elif player_idle_stretch:
+            player_sprite = pygame.transform.scale(
+                player_sprite,
+                (self.tile_size, self.tile_size + player_idle_stretch),
+            )
         player_rect = pygame.Rect(
             player_screen_x * self.tile_size + shake_x,
-            player_screen_y * self.tile_size + player_hop_y,
+            player_screen_y * self.tile_size + player_hop_y + player_idle_y - player_idle_stretch // 2,
             self.tile_size,
-            self.tile_size
+            self.tile_size + player_idle_stretch,
         )
         self.screen.blit(player_sprite, player_rect)
 
