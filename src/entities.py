@@ -36,11 +36,11 @@ WALL_MAP = {
 # Standard floor sprites and their tint palettes.
 FLOOR_VARIANTS = {
     'dot': {
-        'tile': (1, 0),
+        'tiles': [(1, 0)],
         'tints': [(139, 90, 43)],
     },
     'plant': {
-        'tile': (0, 1),
+        'tiles': [(0, 1)],
         'tints': [
             (139, 90, 43),
             (65, 110, 55), (86, 130, 65), (48, 95, 45),
@@ -48,11 +48,14 @@ FLOOR_VARIANTS = {
         ],
     },
     'stones': {
-        'tile': (1, 2),
-        'tints': [(75, 75, 75)],
+        'tiles': [(col, 2) for col in range(1, 5)],
+        'tints': [
+            (75, 75, 75), (95, 95, 95), (115, 115, 115),
+            (105, 75, 48), (130, 95, 62), (155, 120, 82),
+        ],
     },
     'square': {
-        'tile': (0, 0),
+        'tiles': [(0, 0)],
         'tints': [
             (139, 90, 43), (120, 78, 40), (158, 111, 62),
             (65, 65, 65), (80, 80, 80), (95, 95, 95),
@@ -60,11 +63,16 @@ FLOOR_VARIANTS = {
     },
 }
 
-def get_graphic_for_char(g: str, floor_variant: str = 'dot', floor_seed=None) -> Graphic:
+def get_graphic_for_char(
+    g: str,
+    floor_variant: str = 'dot',
+    floor_seed=None,
+    tint_seed=None,
+) -> Graphic:
     if g == '.':
         variant = FLOOR_VARIANTS[floor_variant]
-        col, row = variant['tile']
-        color = Random(floor_seed).choice(variant['tints'])
+        col, row = Random(floor_seed).choice(variant['tiles'])
+        color = Random(tint_seed if tint_seed is not None else floor_seed).choice(variant['tints'])
         sheet = 'general'
     elif g in WALL_MAP:
         sheet, col, row, color = WALL_MAP[g]
@@ -131,8 +139,13 @@ def create_floor(
     level: int = 0,
     tint_seed: str | None = None,
 ) -> None:
-    floor_seed = tint_seed or f'{level}:{x}:{y}'
-    graphic = get_graphic_for_char(g, floor_variant=variant, floor_seed=floor_seed)
+    tile_seed = f'{level}:{x}:{y}'
+    graphic = get_graphic_for_char(
+        g,
+        floor_variant=variant,
+        floor_seed=tile_seed,
+        tint_seed=tint_seed or tile_seed,
+    )
     esper.create_entity(Floor(), Position(x, y), graphic)
 
 def create_map_dimension() -> None:
@@ -188,33 +201,28 @@ def _assign_floor_variants(lines: list[str], level: int) -> dict[tuple[int, int]
         key=lambda position: location_noise[position[1], position[0]],
     )[-varied_count:]
 
-    # A second smooth field assigns one variant to each broad patch, so different
-    # sprites do not alternate tile by tile inside the varied areas.
-    variant_noise = sample_floor_noise(level + 100_003)
-    varied_positions.sort(key=lambda position: variant_noise[position[1], position[0]])
+    # Give each connected varied patch one sprite and tint, avoiding mixed
+    # variants next to one another within the same patch.
     alternate_variants = ('plant', 'stones', 'square')
     variant_by_position: dict[tuple[int, int], str] = {}
-    for index, position in enumerate(varied_positions):
-        variant_index = min(index * len(alternate_variants) // varied_count, len(alternate_variants) - 1)
-        variant_by_position[position] = alternate_variants[variant_index]
-
-    # Give each connected same-variant patch one tint seed, keeping its color uniform.
     tint_seed_by_position: dict[tuple[int, int], str] = {}
-    unassigned = set(variant_by_position)
+    unassigned = set(varied_positions)
+    patch_rng = Random(level)
     while unassigned:
         patch_seed = min(unassigned, key=lambda position: (position[1], position[0]))
-        patch_variant = variant_by_position[patch_seed]
         patch = [patch_seed]
         unassigned.remove(patch_seed)
 
         for x, y in patch:
             for neighbor in ((x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)):
-                if neighbor in unassigned and variant_by_position[neighbor] == patch_variant:
+                if neighbor in unassigned:
                     unassigned.remove(neighbor)
                     patch.append(neighbor)
 
+        patch_variant = patch_rng.choice(alternate_variants)
         tint_seed = f'{level}:{patch_seed[0]}:{patch_seed[1]}'
         for position in patch:
+            variant_by_position[position] = patch_variant
             tint_seed_by_position[position] = tint_seed
 
     return {
