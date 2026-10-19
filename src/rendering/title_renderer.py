@@ -1,5 +1,6 @@
 import pygame
 from .mist_renderer import MistRenderer
+from ..resources import resource_path
 
 class TitleRenderer:
     def __init__(self, screen: pygame.Surface, view_width: int, view_height: int, tile_size: int, font_title: pygame.font.Font, font_sub: pygame.font.Font, font_credits: pygame.font.Font = None):
@@ -13,6 +14,10 @@ class TitleRenderer:
         
         screen_w = view_width * tile_size
         screen_h = view_height * tile_size
+        castle_image = pygame.image.load(resource_path("assets", "dark_castle.png")).convert_alpha()
+        self.background = pygame.transform.scale(castle_image, (screen_w, screen_h))
+        self.background_shade = pygame.Surface((screen_w, screen_h), pygame.SRCALPHA)
+        self.background_shade.fill((0, 0, 0, 85))
         self.mist_renderer = MistRenderer(screen_w, screen_h)
 
     def render(self):
@@ -21,8 +26,9 @@ class TitleRenderer:
         cx, cy = screen_w // 2, screen_h // 2
         time = pygame.time.get_ticks()
 
-        # 1. Fill screen background with dark nocturnal void
-        self.screen.fill((5, 5, 10))
+        # 1. Draw the castle backdrop and shade it slightly for title readability.
+        self.screen.blit(self.background, (0, 0))
+        self.screen.blit(self.background_shade, (0, 0))
 
         # 2. Render scary rolling mist animation layers
         self.mist_renderer.render(self.screen, time)
@@ -66,7 +72,7 @@ class TitleRenderer:
         credit1_shadow = self.font_credits.render(credit1_str, True, (0, 0, 0))
         credit1_text = self.font_credits.render(credit1_str, True, (190, 190, 200))
 
-        c1_y = screen_h - 48
+        c1_y = screen_h - 72
         self.screen.blit(credit1_shadow, credit1_shadow.get_rect(center=(cx + 1, c1_y + 1)))
         self.screen.blit(credit1_text, credit1_text.get_rect(center=(cx, c1_y)))
 
@@ -74,6 +80,14 @@ class TitleRenderer:
         credit2_shadow = self.font_credits.render(credit2_str, True, (0, 0, 0))
         credit2_text = self.font_credits.render(credit2_str, True, (160, 160, 170))
 
-        c2_y = screen_h - 24
+        c2_y = screen_h - 48
         self.screen.blit(credit2_shadow, credit2_shadow.get_rect(center=(cx + 1, c2_y + 1)))
         self.screen.blit(credit2_text, credit2_text.get_rect(center=(cx, c2_y)))
+
+        credit3_str = "Dark Castle background by Captainskolot"
+        credit3_shadow = self.font_credits.render(credit3_str, True, (0, 0, 0))
+        credit3_text = self.font_credits.render(credit3_str, True, (160, 160, 170))
+
+        c3_y = screen_h - 24
+        self.screen.blit(credit3_shadow, credit3_shadow.get_rect(center=(cx + 1, c3_y + 1)))
+        self.screen.blit(credit3_text, credit3_text.get_rect(center=(cx, c3_y)))
