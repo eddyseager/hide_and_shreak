@@ -3,6 +3,7 @@ from random import Random
 import numpy as np
 import tcod.noise
 
+from .constants import FLOOR_NOISE_SCALE, FLOOR_VARIANT_RATIO
 from .floor_variants import FLOOR_VARIANTS, FloorVariantAssignment
 
 
@@ -22,7 +23,7 @@ def assign_floor_variants(
     height = len(lines)
     width = max(map(len, lines))
     y_grid, x_grid = np.mgrid[0:height, 0:width]
-    points = np.stack((x_grid, y_grid), axis=0).astype(np.float32) * 0.18
+    points = np.stack((x_grid, y_grid), axis=0).astype(np.float32) * FLOOR_NOISE_SCALE
 
     noise = tcod.noise.Noise(
         dimensions=2,
@@ -32,7 +33,7 @@ def assign_floor_variants(
     location_noise = noise.sample_mgrid(points)
 
     # Select the roughly 20% highest-noise floor positions.
-    varied_count = round(len(floor_positions) * 0.20)
+    varied_count = round(len(floor_positions) * FLOOR_VARIANT_RATIO)
     if varied_count == 0:
         return {}
     varied_positions = sorted(
