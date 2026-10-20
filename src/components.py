@@ -1,6 +1,7 @@
 from dataclasses import dataclass as component
 import numpy as np
 import esper
+from .colors import RGB
 from .constants import MAP_WIDTH, MAP_HEIGHT, SPAWN_COUNT
 
 
@@ -95,7 +96,7 @@ class Position:
 @component
 class Graphic:
     g: str
-    fg: tuple[int, int, int]
+    fg: RGB
     sheet: str = ""
     col: int = 0
     row: int = 0
