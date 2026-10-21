@@ -3,6 +3,7 @@ import esper
 import pygame
 from ..components import *
 from ..constants import SCREAM_CHARGE_REQUIRED
+from ..floor_variants import FLOOR_VARIANTS
 from ..rendering.sprite_manager import SpriteManager
 from ..rendering.vignette import VignetteRenderer
 from ..rendering.camera import Camera
@@ -146,7 +147,37 @@ class Draw(esper.Processor):
                 color = (int(color[0] * 0.4), int(color[1] * 0.4), int(color[2] * 0.4))
 
             sprite = self.get_sprite(graphic.sheet, graphic.col, graphic.row, color)
-            self.screen.blit(sprite, rect)
+            is_grass = (
+                esper.has_component(ent, Floor)
+                and graphic.sheet == 'general'
+                and (graphic.col, graphic.row) in FLOOR_VARIANTS['plant'].sprites
+            )
+            if is_grass:
+                phase = time * 0.004 + pos.x * 0.7 + pos.y * 0.4
+                # Move the tips far enough to bend their original lean with the sway.
+                top_shift = round(math.sin(phase) * max(1, self.tile_size // 4))
+                strip_height = max(1, self.tile_size // 8)
+
+                # Keep the base still and progressively shift higher strips.
+                previous_clip = self.screen.get_clip()
+                self.screen.set_clip(rect)
+                for strip_y in range(0, self.tile_size, strip_height):
+                    source_rect = pygame.Rect(
+                        0,
+                        strip_y,
+                        self.tile_size,
+                        min(strip_height, self.tile_size - strip_y),
+                    )
+                    height_ratio = (self.tile_size - strip_y - source_rect.height) / self.tile_size
+                    shift = round(top_shift * height_ratio)
+                    self.screen.blit(
+                        sprite,
+                        (rect.x + shift, rect.y + strip_y),
+                        source_rect,
+                    )
+                self.screen.set_clip(previous_clip)
+            else:
+                self.screen.blit(sprite, rect)
 
         # Draw player last at visual coordinates
         player_screen_x = player_visual_x - camera_x
