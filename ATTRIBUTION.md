@@ -10,7 +10,7 @@ This project uses graphics/assets from external sources:
 * **Pixel Art Parallax Backgrounds — Dark Castle Dungeon** by Captainskolot
   * **Source:** [https://captainskolot.itch.io/pixel-art-parallax-backgrounds-dark-castle-dungeon-pixel-art-sprite-pack](https://captainskolot.itch.io/pixel-art-parallax-backgrounds-dark-castle-dungeon-pixel-art-sprite-pack)
   * **License:** [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/)
-  * The source image is included in the game and displayed with in-game scaling and a dark overlay. The creator permits use and modification in free and commercial projects; credit is appreciated but not required. The assets may not be redistributed or resold on their own, including in NFT or image compilations.
+  * The source image is included in the game and displayed with in-game scaling and a dark overlay. The creator permits use and modification in free and commercial projects; credit is appreciated but not required. The pack's page says assets may not be redistributed or resold on their own, including in NFT or image compilations. CaptainSkolot separately confirmed in writing that including the pack in this game's public GitHub repository is okay ([itch.io reply](https://itch.io/post/17679466)).
 
 ## Fonts
 
