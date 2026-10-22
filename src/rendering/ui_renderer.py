@@ -2,6 +2,7 @@ import math
 import pygame
 from .title_renderer import TitleRenderer
 from .game_over_renderer import GameOverRenderer
+from ..resources import resource_path
 
 class UIRenderer:
     def __init__(self, screen: pygame.Surface, view_width: int, view_height: int, tile_size: int):
@@ -10,6 +11,8 @@ class UIRenderer:
         self.view_height = view_height
         self.tile_size = tile_size
         self._font_title = None
+        self._font_title_menu = None
+        self._font_menu_options = None
         self._font_story = None
         self._font_sub = None
         self._font_credits = None
@@ -25,8 +28,10 @@ class UIRenderer:
             # Clean, highly readable sans-serif font cascade for menu options and instructions
             readable_fonts = ["segoeui", "arial", "helvetica", "sans-serif"]
             self._font_title = pygame.font.SysFont(gothic_fonts, 100)
-            self._font_sub = pygame.font.SysFont(readable_fonts, 32, bold=True)
-            self._font_credits = pygame.font.SysFont(readable_fonts, 22)
+            self._font_title_menu = pygame.font.Font(resource_path("fonts", "Unutterable-Regular.ttf"), 100)
+            self._font_menu_options = pygame.font.Font(resource_path("fonts", "Unutterable-Regular.ttf"), 42)
+            self._font_sub = pygame.font.Font(resource_path("fonts", "Not Jam Mono Clean 13.ttf"), 39)
+            self._font_credits = pygame.font.Font(resource_path("fonts", "Not Jam Mono Clean 13.ttf"), 26)
         return self._font_title, self._font_sub, self._font_credits
 
     def _get_backdrop(self, width: int, height: int) -> pygame.Surface:
@@ -37,19 +42,24 @@ class UIRenderer:
             self._backdrop_banner = banner
         return self._backdrop_banner
 
-    def render_title_screen(self):
-        font_title, font_sub, font_credits = self._get_fonts()
+    def render_title_screen(self) -> str | None:
+        _, font_sub, font_credits = self._get_fonts()
         if self._title_renderer is None:
             self._title_renderer = TitleRenderer(
                 self.screen,
                 self.view_width,
                 self.view_height,
                 self.tile_size,
-                font_title,
+                self._font_title_menu,
+                self._font_menu_options,
                 font_sub,
                 font_credits,
             )
-        self._title_renderer.render()
+        return self._title_renderer.render()
+
+    def handle_title_event(self, event: pygame.event.Event) -> None:
+        if self._title_renderer is not None:
+            self._title_renderer.handle_event(event)
 
     def render_game_over(self):
         font_title, font_sub, _ = self._get_fonts()
@@ -61,8 +71,9 @@ class UIRenderer:
 
     def render_story_overlay(self, line1: str, line2: str):
         if self._font_story is None:
-            gothic_fonts = ["oldenglishtext", "blackadderitc", "chiller", "goudyoldstyle", "georgia", "serif"]
-            self._font_story = pygame.font.SysFont(gothic_fonts, 30)
+            self._font_story = pygame.font.Font(
+                resource_path("fonts", "Not Jam Mono Clean 13.ttf"), 26
+            )
         screen_w = self.view_width * self.tile_size
         screen_h = self.view_height * self.tile_size
         cx = screen_w // 2

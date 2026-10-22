@@ -33,10 +33,31 @@ def main() -> None:
     game_initialized = False
     ui_renderer = UIRenderer(screen, VIEW_WIDTH, VIEW_HEIGHT, TILE_SIZE)
 
+    def start_game() -> None:
+        nonlocal state, game_initialized
+        state = "PLAYING"
+        pygame.mixer.music.load(resource_path("music", "gameplay.mp3"))
+        pygame.mixer.music.set_volume(0.4)
+        pygame.mixer.music.play(-1)
+
+        if not game_initialized:
+            level = 0
+            esper.switch_world(f"level_{level}")
+            init_level_world(level, screen, 0)
+
+            _, (_, start_pos) = esper.get_components(StartPoint, Position)[0]
+            create_player(start_pos.x, start_pos.y)
+            game_initialized = True
+
     running = True
     while running:
         if state == "TITLE":
-            ui_renderer.render_title_screen()
+            title_action = ui_renderer.render_title_screen()
+            if title_action == "play":
+                start_game()
+            elif title_action == "quit":
+                running = False
+
             pygame.display.flip()
             clock.tick(30)
 
@@ -45,26 +66,8 @@ def main() -> None:
                     running = False
                 elif event.type == TOGGLE_DISPLAY_EVENT:
                     pygame.display.toggle_fullscreen()
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_SPACE:
-                        # Switch to gameplay state & start gameplay music
-                        state = "PLAYING"
-                        pygame.mixer.music.load(resource_path("music", "gameplay.mp3"))
-                        pygame.mixer.music.set_volume(0.4)
-                        pygame.mixer.music.play(-1)
-
-                        if not game_initialized:
-                            level = 0
-                            esper.switch_world(f"level_{level}")
-                            init_level_world(level, screen, 0)
-
-                            _, (_, start_pos) = esper.get_components(StartPoint, Position)[0]
-                            create_player(start_pos.x, start_pos.y)
-                            game_initialized = True
-                    elif event.key == pygame.K_ESCAPE:
-                        running = False
-                    elif event.key == pygame.K_f:
-                        pygame.display.toggle_fullscreen()
+                elif state == "TITLE":
+                    ui_renderer.handle_title_event(event)
         elif state == "PLAYING":
             # Run ECS processing
             esper.process()
