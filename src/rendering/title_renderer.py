@@ -27,8 +27,8 @@ class TitleRenderer:
         # 2. Render scary rolling mist animation layers
         self.mist_renderer.render(self.screen, time)
 
-        # 3. Game Title "Hide and Shreak" in gothic font
-        title_str = "Hide and Shreak"
+        # 3. Game Title "Hide and shriek" in gothic font
+        title_str = "Hide and shriek"
         title_shadow = self.font_title.render(title_str, True, (0, 0, 0))
         title_text = self.font_title.render(title_str, True, (255, 255, 255))
 

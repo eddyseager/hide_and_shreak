@@ -82,7 +82,7 @@ wheels = [
 ]
 
 [[package]]
-name = "hide-and-shreak"
+name = "hide-and-shriek"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

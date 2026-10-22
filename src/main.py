@@ -26,7 +26,7 @@ def main() -> None:
 
     # Initialize standard window size with RESIZABLE and SCALED flags.
     screen = pygame.display.set_mode((VIEW_WIDTH * TILE_SIZE, VIEW_HEIGHT * TILE_SIZE), pygame.RESIZABLE | pygame.SCALED)
-    pygame.display.set_caption("Hide and Shreak")
+    pygame.display.set_caption("Hide and shriek")
     clock = pygame.time.Clock()
 
     state = "TITLE"

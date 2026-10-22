@@ -40,7 +40,7 @@ def on_event(event: pygame.event.Event) -> None:
         elif event.key == pygame.K_COMMA:
             player_events.change_level_up()
         elif event.key == pygame.K_SPACE:
-            player_events.shreak()
+            player_events.shriek()
         elif event.key == pygame.K_ESCAPE:
             raise SystemExit
         elif event.key == pygame.K_f:

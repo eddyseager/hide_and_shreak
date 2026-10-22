@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "hide_and_shreak"
+name = "hide_and_shriek"
 version = "0.1.0"
 description = "A Python roguelike demo where your only objective is survival"
 readme = "README.md"
@@ -16,7 +16,7 @@ dependencies = [
 ]
 
 [project.scripts]
-hide_and_shreak = "src.main:main"
+hide_and_shriek = "src.main:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src"]

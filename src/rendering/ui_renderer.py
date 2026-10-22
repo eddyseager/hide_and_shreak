@@ -20,7 +20,7 @@ class UIRenderer:
 
     def _get_fonts(self):
         if self._font_title is None:
-            # Gothic / medieval font cascade for titles ("Hide and Shreak", "Game Over")
+            # Gothic / medieval font cascade for titles ("Hide and shriek", "Game Over")
             gothic_fonts = ["oldenglishtext", "blackadderitc", "chiller", "goudyoldstyle", "georgia", "serif"]
             # Clean, highly readable sans-serif font cascade for menu options and instructions
             readable_fonts = ["segoeui", "arial", "helvetica", "sans-serif"]

@@ -57,7 +57,7 @@ def move_player(dx: int, dy: int) -> None:
         counter = get_singleton(Counter)
         counter.val += 1
 
-def shreak() -> None:
+def shriek() -> None:
     player_ent, (_, player_pos) = get_singleton_by_components(Player, Position)
     player = esper.component_for_entity(player_ent, Player)
     if player.scream_charge < SCREAM_CHARGE_REQUIRED:
