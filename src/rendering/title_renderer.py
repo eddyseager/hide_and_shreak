@@ -9,6 +9,7 @@ from ..resources import resource_path
 
 class TitleRenderer:
     CLICK_FEEDBACK_MS = 130
+    FADE_DURATION_MS = 400
     GITHUB_URL = 'https://github.com/jupitersoftwarecorp/hide_and_shriek'
 
     def __init__(
@@ -38,7 +39,7 @@ class TitleRenderer:
         self.background_shade = pygame.Surface((screen_w, screen_h), pygame.SRCALPHA)
         self.background_shade.fill((0, 0, 0, 85))
         self.mist_renderer = MistRenderer(screen_w, screen_h)
-        self.menu_click_sound = pygame.mixer.Sound(resource_path('sounds', 'Menu_click.wav'))
+        self.menu_click_sound = pygame.mixer.Sound(resource_path('sounds', 'Menu_click_1.wav'))
 
         self.page = 'main'
         self.menu_item_rects: dict[str, pygame.Rect] = {}
@@ -47,13 +48,17 @@ class TitleRenderer:
         self.click_feedback_item: str | None = None
         self.click_feedback_start = 0
         self.pending_action: tuple[str, int] | None = None
+        self.transition_action: str | None = None
+        self.transition_phase: str | None = None
+        self.transition_start = 0
+        self.fade_surface: pygame.Surface | None = None
         self.last_render_time: int | None = None
         self.github_link_rect: pygame.Rect | None = None
         self.pressed_github_link = False
         self.github_link_hovered = False
 
     def handle_event(self, event: pygame.event.Event) -> None:
-        if self.pending_action is not None:
+        if self.pending_action is not None or self.transition_phase is not None:
             return
 
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -148,6 +153,7 @@ class TitleRenderer:
             self.github_link_hovered = hovered_link
 
         self._render_menu_items(cx, cy, now, delta_seconds)
+        self._render_transition_fade(now)
         return action
 
     def _render_title(self, cx: int, cy: int) -> None:
@@ -240,19 +246,55 @@ class TitleRenderer:
         return None
 
     def _advance_pending_action(self, now: int) -> str | None:
-        if self.pending_action is None:
-            return None
-        action, due_time = self.pending_action
-        if now < due_time:
+        if self.pending_action is not None:
+            action, due_time = self.pending_action
+            if now >= due_time:
+                self.pending_action = None
+                self.transition_action = action
+                self.transition_phase = 'out'
+                self.transition_start = now
+
+        if self.transition_phase is None:
             return None
 
-        self.pending_action = None
-        if action == 'show_options':
-            self.page = 'options'
-        elif action == 'show_credits':
-            self.page = 'credits'
-        elif action == 'back':
-            self.page = 'main'
-        elif action in ('play', 'quit'):
-            return action
+        elapsed = now - self.transition_start
+        if elapsed < self.FADE_DURATION_MS:
+            return None
+
+        if self.transition_phase == 'out':
+            action = self.transition_action
+            if action == 'show_options':
+                self.page = 'options'
+            elif action == 'show_credits':
+                self.page = 'credits'
+            elif action == 'back':
+                self.page = 'main'
+            elif action in ('play', 'quit'):
+                self.transition_phase = 'complete'
+                return action
+
+            self.transition_phase = 'in'
+            self.transition_start = now
+        elif self.transition_phase == 'in':
+            self.transition_phase = None
+            self.transition_action = None
+
         return None
+
+    def _render_transition_fade(self, now: int) -> None:
+        if self.transition_phase is None:
+            return
+
+        screen_size = self.screen.get_size()
+        if self.fade_surface is None or self.fade_surface.get_size() != screen_size:
+            self.fade_surface = pygame.Surface(screen_size, pygame.SRCALPHA)
+
+        if self.transition_phase == 'complete':
+            alpha = 255
+        else:
+            progress = min(1.0, (now - self.transition_start) / self.FADE_DURATION_MS)
+            alpha = round(255 * progress) if self.transition_phase == 'out' else round(255 * (1 - progress))
+
+        if alpha > 0:
+            self.fade_surface.fill((0, 0, 0, alpha))
+            self.screen.blit(self.fade_surface, (0, 0))

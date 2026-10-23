@@ -20,6 +20,8 @@ class UIRenderer:
         self._scream_wave_last_ticks = None
         self._backdrop_banner = None
         self._title_renderer = None
+        self._game_fade_start = None
+        self._game_fade_surface = None
 
     def _get_fonts(self):
         if self._font_title is None:
@@ -60,6 +62,28 @@ class UIRenderer:
     def handle_title_event(self, event: pygame.event.Event) -> None:
         if self._title_renderer is not None:
             self._title_renderer.handle_event(event)
+
+    def start_game_fade_in(self) -> None:
+        self._game_fade_start = pygame.time.get_ticks()
+
+    def render_game_fade_in(self) -> None:
+        if self._game_fade_start is None:
+            return
+
+        fade_duration_ms = 5000
+        elapsed = pygame.time.get_ticks() - self._game_fade_start
+        progress = min(1.0, elapsed / fade_duration_ms)
+        alpha = round(255 * (1 - progress))
+
+        if alpha > 0:
+            screen_size = self.screen.get_size()
+            if self._game_fade_surface is None or self._game_fade_surface.get_size() != screen_size:
+                self._game_fade_surface = pygame.Surface(screen_size, pygame.SRCALPHA)
+            self._game_fade_surface.fill((0, 0, 0, alpha))
+            self.screen.blit(self._game_fade_surface, (0, 0))
+
+        if progress >= 1.0:
+            self._game_fade_start = None
 
     def render_game_over(self):
         _, font_sub, _ = self._get_fonts()

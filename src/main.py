@@ -55,6 +55,7 @@ def main() -> None:
             title_action = ui_renderer.render_title_screen()
             if title_action == "play":
                 start_game()
+                ui_renderer.start_game_fade_in()
             elif title_action == "quit":
                 running = False
 
@@ -71,6 +72,9 @@ def main() -> None:
         elif state == "PLAYING":
             # Run ECS processing
             esper.process()
+
+            # Fade in from the title screen after starting a new game.
+            ui_renderer.render_game_fade_in()
             
             # Present screen
             pygame.display.flip()
