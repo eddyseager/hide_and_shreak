@@ -1,4 +1,5 @@
 import math
+import webbrowser
 
 import pygame
 
@@ -8,6 +9,7 @@ from ..resources import resource_path
 
 class TitleRenderer:
     CLICK_FEEDBACK_MS = 130
+    GITHUB_URL = 'https://github.com/jupitersoftwarecorp/hide_and_shriek'
 
     def __init__(
         self,
@@ -46,14 +48,25 @@ class TitleRenderer:
         self.click_feedback_start = 0
         self.pending_action: tuple[str, int] | None = None
         self.last_render_time: int | None = None
+        self.github_link_rect: pygame.Rect | None = None
+        self.pressed_github_link = False
+        self.github_link_hovered = False
 
     def handle_event(self, event: pygame.event.Event) -> None:
         if self.pending_action is not None:
             return
 
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if self.github_link_rect and self.github_link_rect.collidepoint(event.pos):
+                self.pressed_github_link = True
+                return
             self.pressed_item = self._item_at(event.pos)
         elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            if self.pressed_github_link:
+                self.pressed_github_link = False
+                if self.github_link_rect and self.github_link_rect.collidepoint(event.pos):
+                    webbrowser.open(self.GITHUB_URL)
+                return
             clicked = self.pressed_item
             self.pressed_item = None
             if (
@@ -88,25 +101,51 @@ class TitleRenderer:
         self.mist_renderer.render(self.screen, now)
         self._render_title(cx, cy)
 
+        self.github_link_rect = None
         if self.page == 'options':
             self._render_centered_text(
                 'Options are coming soon.', self.font_sub, (205, 214, 224), (cx, cy + 10)
             )
         elif self.page == 'credits':
             credits = (
-                'Game and code: Edwin van Seagull',
-                'Music: Edwin van Seagull',
-                'Sound effects: Edward Seager',
+                'Game and code: Jupiter Software',
+                'Music: Jupiter Software',
+                'Sound effects: Jupiter Software, YourPalRob',
                 'Tilesheets: Hexany Ives',
                 'Dark Castle background: Captainskolot',
+                'https://github.com/jupitersoftwarecorp/hide_and_shriek',
             )
             for index, line in enumerate(credits):
-                self._render_centered_text(
-                    line,
-                    self.font_credits,
-                    (205, 214, 224),
-                    (cx, cy - 50 + index * 36),
-                )
+                center = (cx, cy - 82 + index * 28)
+                if line == self.GITHUB_URL:
+                    color = (151, 220, 255)
+                    rendered = self.font_credits.render(line, True, color)
+                    link_rect = rendered.get_rect(center=center)
+                    self.screen.blit(rendered, link_rect)
+                    pygame.draw.line(
+                        self.screen,
+                        color,
+                        (link_rect.left, link_rect.bottom + 2),
+                        (link_rect.right, link_rect.bottom + 2),
+                        1,
+                    )
+                    self.github_link_rect = link_rect.inflate(8, 8)
+                else:
+                    self._render_centered_text(
+                        line,
+                        self.font_credits,
+                        (205, 214, 224),
+                        center,
+                    )
+
+        hovered_link = bool(
+            self.github_link_rect
+            and self.github_link_rect.collidepoint(pygame.mouse.get_pos())
+        )
+        if hovered_link != self.github_link_hovered:
+            cursor = pygame.SYSTEM_CURSOR_HAND if hovered_link else pygame.SYSTEM_CURSOR_ARROW
+            pygame.mouse.set_cursor(cursor)
+            self.github_link_hovered = hovered_link
 
         self._render_menu_items(cx, cy, now, delta_seconds)
         return action

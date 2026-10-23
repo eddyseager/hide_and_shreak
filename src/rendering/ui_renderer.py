@@ -62,11 +62,19 @@ class UIRenderer:
             self._title_renderer.handle_event(event)
 
     def render_game_over(self):
-        font_title, font_sub, _ = self._get_fonts()
+        _, font_sub, _ = self._get_fonts()
         screen_w = self.view_width * self.tile_size
         screen_h = self.view_height * self.tile_size
         backdrop = self._get_backdrop(screen_w, screen_h)
-        renderer = GameOverRenderer(self.screen, self.view_width, self.view_height, self.tile_size, font_title, font_sub, backdrop)
+        renderer = GameOverRenderer(
+            self.screen,
+            self.view_width,
+            self.view_height,
+            self.tile_size,
+            self._font_title_menu,
+            font_sub,
+            backdrop,
+        )
         renderer.render()
 
     def render_story_overlay(self, line1: str, line2: str):

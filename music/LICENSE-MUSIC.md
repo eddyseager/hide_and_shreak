@@ -1,6 +1,6 @@
 Audio License Notice
 
-All sound effects and music tracks in this directory are Copyright (c) 2026 Edward Seager. 
+Original music tracks in this directory are Copyright (c) 2026 Jupiter Software.
 All Rights Reserved.
 
 These audio assets are proprietary and are NOT licensed under the GNU General Public License (GPLv3) 
